@@ -1,8 +1,10 @@
 # Yii Frontend (AngularJS 1.x + Bootstrap 5)
 
-Frontend de estudo que consome a API REST do projeto vizinho `../yii2-app-basic`.
+SPA de estudo que consome a API REST do projeto vizinho `../yii2-app-basic`.
 
-Stack — todas as libs vêm de CDN (sem `npm install`):
+## Stack
+
+Todas as libs vêm de CDN — não há `npm install` nem etapa de build:
 
 - AngularJS 1.8.3
 - Angular UI-Router 1.0.30 (rotas aninhadas para as tabs)
@@ -10,24 +12,19 @@ Stack — todas as libs vêm de CDN (sem `npm install`):
 
 ## Como rodar
 
-Em **dois terminais**:
-
-### 1. Backend Yii (porta 8080)
+### 1. Suba o backend primeiro
 
 ```bash
 cd ../yii2-app-basic
-php yii serve
+php yii serve        # API em http://localhost:8080
 ```
 
-A API fica em `http://localhost:8080`. CORS já está habilitado nos 4 controllers REST.
+### 2. Suba o frontend
 
-### 2. Frontend (qualquer servidor estático)
-
-Não pode ser aberto via `file://` porque o UI-Router carrega templates por `templateUrl`. Use um dos abaixo a partir do diretório `yii-frontend-angular`:
+O app **não pode ser aberto via `file://`** porque o UI-Router carrega templates por `templateUrl`. Use qualquer servidor estático a partir do diretório `yii-frontend-angular`:
 
 ```bash
-# Python 3
-python -m http.server 5500
+python -m http.server 5500   # http://localhost:5500
 
 # ou PHP
 php -S localhost:5500
@@ -35,21 +32,26 @@ php -S localhost:5500
 # ou VS Code: extensão Live Server
 ```
 
-Acesse `http://localhost:5500/`.
-
 > Se mudar a porta do Yii, ajuste `app/services/apiConfig.js` (`API_BASE_URL`).
 
-## Fluxo das telas
+## Fluxo de telas
 
-1. **`/users`** — listagem com filtro por nome/email/ativo (filtro client-side).
-2. **`/users/new`** — formulário de criação (name + email). Após o POST o app busca o usuário recém-criado pelo email (unique) e redireciona direto para a tela de edição na aba **Info**.
-3. **`/users/:id/edit/info`** — edita name/email do usuário (PUT).
-4. **`/users/:id/edit/configs`** — lista as configs do user (vêm aninhadas em `GET /user-api/:id`) + form para criar nova config.
-5. **`/users/:id/edit/profiles`** — lista os profiles do user + form para criar novo profile.
-6. **`/users/:id/edit/settings`** — escolhe um profile do user e cria/atualiza/remove o setting (1:1 com profile).
+| Rota                            | Tela                                                     |
+|---------------------------------|----------------------------------------------------------|
+| `/users`                        | Listagem com filtro client-side por nome / email / ativo |
+| `/users/new`                    | Criação (name + email); redireciona para edição após POST |
+| `/users/:id/edit/info`          | Edita name/email (PUT)                                   |
+| `/users/:id/edit/configs`       | Lista configs aninhadas + form para criar nova           |
+| `/users/:id/edit/profiles`      | Lista profiles aninhados + form para criar novo          |
+| `/users/:id/edit/settings`      | Cria/atualiza/remove setting 1:1 com profile             |
 
 ## Notas sobre a API
 
-- Envelope padrão de resposta: `{ success, type, data | message }`. Os services do Angular já desempacotam o `data`.
-- `POST /user-api` retorna apenas uma string de sucesso, sem o id do recurso criado — por isso `UserCreateCtrl` faz um `findAll` em seguida e localiza o user por email.
-- `user-config`, `user-profile` e `user-profile-setting` têm várias actions ainda como `// TODO` no backend (delete/update de config, findById de profile, findAll/findById de setting). O frontend só chama o que está implementado de fato.
+- Envelope padrão: `{ success, type, data | message }`. Os services Angular já desempacotam o `data` — controllers nunca veem o envelope.
+- `POST /user-api` retorna apenas uma string de sucesso, sem o id do recurso criado. Por isso `UserCreateCtrl` faz um `findAll` logo após e localiza o usuário pelo email (unique) para redirecionar para a edição.
+- `GET /user-api/:id` devolve o usuário com `configs` e `profiles` aninhados. As tabs de edição leem desse objeto cacheado em vez de fazer chamadas separadas.
+- `user-config`, `user-profile` e `user-profile-setting` têm algumas actions marcadas como `// TODO` no backend (ex.: delete/update de config). O frontend só chama endpoints que estão implementados.
+
+## CI
+
+O pipeline `frontend-ci.yml` roda `node --check` em todos os arquivos `.js` do diretório `app/` para garantir que nenhuma sintaxe inválida chegue ao repositório.

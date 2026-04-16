@@ -1,7 +1,7 @@
 <?php
 
 $db = require __DIR__ . '/db.php';
-// test database! Important not to run tests on production or development databases
-$db['dsn'] = 'mysql:host=localhost;dbname=yii2basic_test';
+// banco separado para não tocar nos dados de desenvolvimento
+$db['dsn'] = 'sqlite:' . dirname(__DIR__) . '/runtime/test_database.sqlite';
 
 return $db;

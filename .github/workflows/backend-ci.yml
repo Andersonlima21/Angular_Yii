@@ -1,0 +1,56 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - 'yii2-app-basic/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    paths:
+      - 'yii2-app-basic/**'
+      - '.github/workflows/backend-ci.yml'
+
+defaults:
+  run:
+    working-directory: yii2-app-basic
+
+jobs:
+  build:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php: ['8.1', '8.2']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo, pdo_sqlite
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: yii2-app-basic/vendor
+          key: composer-${{ matrix.php }}-${{ hashFiles('yii2-app-basic/composer.lock') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHP syntax check
+        run: find . -name "*.php" -not -path "./vendor/*" -not -path "./runtime/*" | xargs php -l
+
+      - name: Prepare runtime directory
+        run: mkdir -p runtime && chmod 777 runtime
+
+      - name: Run migrations (test DB)
+        run: tests/bin/yii migrate --interactive=0
+
+      - name: Run tests
+        run: vendor/bin/codecept run unit functional --no-colors

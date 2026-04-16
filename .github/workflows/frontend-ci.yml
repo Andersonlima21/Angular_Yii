@@ -1,0 +1,32 @@
+name: Frontend CI
+
+on:
+  push:
+    paths:
+      - 'yii-frontend-angular/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'yii-frontend-angular/**'
+      - '.github/workflows/frontend-ci.yml'
+
+jobs:
+  syntax-check:
+    name: JS Syntax Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check JS syntax
+        run: |
+          echo "Verificando sintaxe dos arquivos JS..."
+          find yii-frontend-angular/app -name "*.js" | while read file; do
+            node --check "$file" && echo "  OK: $file" || { echo "  ERRO: $file"; exit 1; }
+          done
+          echo "Todos os arquivos passaram na verificação de sintaxe."
