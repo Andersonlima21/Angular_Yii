@@ -10,20 +10,18 @@ angular
 
             $stateProvider
                 .state('users', {
-                    url: '/users',
-                    templateUrl: 'app/views/user-list.html',
-                    controller: 'UserListCtrl'
+                    url:       '/users',
+                    component: 'userList'
                 })
                 .state('newUser', {
-                    url: '/users/new',
-                    templateUrl: 'app/views/user-create.html',
-                    controller: 'UserCreateCtrl'
+                    url:       '/users/new',
+                    component: 'userCreate'
                 })
-                // Parent state que carrega o user e expõe via $scope.user para os filhos.
+                // Parent state — resolve carrega o usuário e injeta como binding no componente.
+                // O componente user-edit publica esses dados no userEditContext para as tabs filhas.
                 .state('editUser', {
-                    url: '/users/{id:[0-9]+}/edit',
-                    templateUrl: 'app/views/user-edit.html',
-                    controller: 'UserEditCtrl',
+                    url:       '/users/{id:[0-9]+}/edit',
+                    component: 'userEdit',
                     resolve: {
                         userData: ['$stateParams', 'userService',
                             function ($stateParams, userService) {
@@ -32,22 +30,18 @@ angular
                     }
                 })
                 .state('editUser.info', {
-                    url: '/info',
-                    templateUrl: 'app/views/tab-info.html',
-                    controller: 'UserTabInfoCtrl'
+                    url:       '/info',
+                    component: 'tabInfo'
                 })
                 .state('editUser.configs', {
-                    url: '/configs',
-                    templateUrl: 'app/views/tab-configs.html',
-                    controller: 'UserTabConfigsCtrl'
+                    url:       '/configs',
+                    component: 'tabConfigs'
                 })
                 .state('editUser.profiles', {
-                    url: '/profiles',
-                    templateUrl: 'app/views/tab-profiles.html',
-                    controller: 'UserTabProfilesCtrl'
+                    url:       '/profiles',
+                    component: 'tabProfiles'
                 })
-;
-        }])
+;        }])
     // Quando entrar em editUser sem aba, redireciona para info por padrão.
     .run(['$transitions', '$state', function ($transitions, $state) {
         $transitions.onSuccess({ to: 'editUser' }, function (trans) {

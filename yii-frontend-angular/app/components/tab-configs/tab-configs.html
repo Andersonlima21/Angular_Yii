@@ -1,0 +1,78 @@
+<alert-msg success="$ctrl.message" error="$ctrl.error"></alert-msg>
+
+<form class="card card-body mb-3" ng-submit="$ctrl.submit()" novalidate>
+    <h6 class="mb-3">
+        <i class="bi" ng-class="$ctrl.editingId ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+        <span ng-if="!$ctrl.editingId">Nova config</span>
+        <span ng-if="$ctrl.editingId">Editando config #{{ $ctrl.editingId }}</span>
+    </h6>
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Key</label>
+            <input type="text" class="form-control" ng-model="$ctrl.form.key"
+                   required maxlength="100" placeholder="ex: theme">
+        </div>
+        <div class="col-md-5">
+            <label class="form-label">Value</label>
+            <input type="text" class="form-control" ng-model="$ctrl.form.value"
+                   placeholder="ex: dark">
+        </div>
+        <div class="col-md-3 d-grid gap-2">
+            <button type="submit" class="btn btn-primary"
+                    ng-disabled="$ctrl.saving || !$ctrl.form.key">
+                <span ng-if="!$ctrl.saving">
+                    <i class="bi" ng-class="$ctrl.editingId ? 'bi-save' : 'bi-plus-lg'"></i>
+                    {{ $ctrl.editingId ? 'Salvar' : 'Adicionar' }}
+                </span>
+                <span ng-if="$ctrl.saving">Salvando...</span>
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    ng-if="$ctrl.editingId" ng-click="$ctrl.cancelEdit()">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</form>
+
+<div class="card">
+    <div class="card-header">Configurações deste usuário</div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 70px">#</th>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th style="width: 160px">Criado em</th>
+                    <th style="width: 160px">Atualizado em</th>
+                    <th style="width: 140px" class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="c in $ctrl.configs"
+                    ng-class="{ 'table-warning': $ctrl.editingId === c.id }">
+                    <td class="text-muted">{{ c.id }}</td>
+                    <td><code>{{ c.key }}</code></td>
+                    <td>{{ c.value }}</td>
+                    <td class="text-muted small">{{ c.created_at | sqlDate }}</td>
+                    <td class="text-muted small">{{ c.updated_at | sqlDate }}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary"
+                                ng-click="$ctrl.startEdit(c)" ng-disabled="$ctrl.saving">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger"
+                                ng-click="$ctrl.remove(c)" ng-disabled="$ctrl.saving">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr ng-if="$ctrl.configs.length === 0">
+                    <td colspan="6" class="text-center text-muted py-3">
+                        Nenhuma configuração cadastrada.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

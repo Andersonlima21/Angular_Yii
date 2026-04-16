@@ -1,0 +1,136 @@
+<alert-msg success="$ctrl.message" error="$ctrl.error"></alert-msg>
+
+<div ng-if="!$ctrl.profile" class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i>
+    Este usuário ainda não tem profile. Crie um na aba <strong>Profile</strong> antes de configurar settings.
+</div>
+
+<form ng-if="$ctrl.profile" class="card card-body mb-3" ng-submit="$ctrl.submit()" novalidate>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">
+            <i class="bi" ng-class="$ctrl.editingId ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+            <span ng-if="!$ctrl.editingId">Novos settings (envio em lote)</span>
+            <span ng-if="$ctrl.editingId">Editando setting #{{ $ctrl.editingId }}</span>
+        </h6>
+        <small class="text-muted">Profile <strong>#{{ $ctrl.profile.id }}</strong></small>
+    </div>
+
+    <div class="border rounded p-2 mb-2"
+         ng-repeat="row in $ctrl.rows"
+         ng-class="{ 'border-warning bg-warning-subtle': $ctrl.editingId }">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted">Setting {{ $index + 1 }}</small>
+            <button type="button" class="btn btn-sm btn-outline-danger"
+                    ng-if="!$ctrl.editingId && $ctrl.rows.length > 1"
+                    ng-click="$ctrl.removeRow($index)">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="row g-2">
+            <div class="col-md-3">
+                <label class="form-label">Theme</label>
+                <select class="form-select" ng-model="row.theme">
+                    <option value="light">light</option>
+                    <option value="dark">dark</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Language</label>
+                <input type="text" class="form-control" ng-model="row.language" maxlength="10">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Timezone</label>
+                <input type="text" class="form-control" ng-model="row.timezone" maxlength="50">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">URL</label>
+                <input type="url" class="form-control" ng-model="row.url" maxlength="500">
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox"
+                           id="notif-{{ $index }}" ng-model="row.notifications_enabled">
+                    <label class="form-check-label" for="notif-{{ $index }}">
+                        Notificações habilitadas
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-2">
+        <div>
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    ng-if="!$ctrl.editingId" ng-click="$ctrl.addRow()" ng-disabled="$ctrl.saving">
+                <i class="bi bi-plus-lg"></i> Adicionar mais um
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    ng-if="$ctrl.editingId" ng-click="$ctrl.cancelEdit()">
+                Cancelar edição
+            </button>
+        </div>
+        <button type="submit" class="btn btn-primary" ng-disabled="$ctrl.saving">
+            <i class="bi bi-save"></i>
+            <span ng-if="!$ctrl.saving">
+                <span ng-if="$ctrl.editingId">Salvar</span>
+                <span ng-if="!$ctrl.editingId">Criar {{ $ctrl.rows.length }} setting{{ $ctrl.rows.length > 1 ? 's' : '' }}</span>
+            </span>
+            <span ng-if="$ctrl.saving">Salvando...</span>
+        </button>
+    </div>
+</form>
+
+<div ng-if="$ctrl.profile" class="card">
+    <div class="card-header d-flex justify-content-between">
+        <span>Settings deste profile</span>
+        <small class="text-muted" ng-if="$ctrl.loading">Carregando...</small>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 60px">#</th>
+                    <th>Theme</th>
+                    <th>Language</th>
+                    <th>Timezone</th>
+                    <th>Notif.</th>
+                    <th>URL</th>
+                    <th style="width: 150px">Atualizado em</th>
+                    <th style="width: 110px" class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="s in $ctrl.settings"
+                    ng-class="{ 'table-warning': $ctrl.editingId === s.id }">
+                    <td class="text-muted">{{ s.id }}</td>
+                    <td>{{ s.theme }}</td>
+                    <td>{{ s.language }}</td>
+                    <td>{{ s.timezone }}</td>
+                    <td>
+                        <i class="bi" ng-class="s.notifications_enabled ? 'bi-bell-fill text-success' : 'bi-bell-slash text-muted'"></i>
+                    </td>
+                    <td class="small text-truncate" style="max-width: 200px;">
+                        <a ng-if="s.url" ng-href="{{ s.url }}" target="_blank">{{ s.url }}</a>
+                        <span ng-if="!s.url" class="text-muted">—</span>
+                    </td>
+                    <td class="text-muted small">{{ s.updated_at | sqlDate }}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary"
+                                ng-click="$ctrl.startEdit(s)" ng-disabled="$ctrl.saving">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger"
+                                ng-click="$ctrl.remove(s)" ng-disabled="$ctrl.saving">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr ng-if="!$ctrl.loading && $ctrl.settings.length === 0">
+                    <td colspan="8" class="text-center text-muted py-3">
+                        Nenhum setting cadastrado para este profile.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

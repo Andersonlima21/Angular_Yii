@@ -1,0 +1,25 @@
+<alert-msg success="$ctrl.message" error="$ctrl.error"></alert-msg>
+
+<form class="card card-body" ng-submit="$ctrl.save()" novalidate>
+    <div class="mb-3">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" ng-model="$ctrl.form.name" required maxlength="255">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" ng-model="$ctrl.form.email" required maxlength="255">
+    </div>
+
+    <div class="row text-muted small mb-3">
+        <div class="col-md-6">Criado: {{ $ctrl.user.created_at | sqlDate }}</div>
+        <div class="col-md-6">Atualizado: {{ $ctrl.user.updated_at | sqlDate }}</div>
+    </div>
+
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary" ng-disabled="$ctrl.saving">
+            <i class="bi bi-save"></i>
+            <span ng-if="!$ctrl.saving">Salvar</span>
+            <span ng-if="$ctrl.saving">Salvando...</span>
+        </button>
+    </div>
+</form>
