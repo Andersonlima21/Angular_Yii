@@ -1,0 +1,418 @@
+{
+	"info": {
+		"_postman_id": "b1a1c001-0001-0001-0001-000000000001",
+		"name": "yii2-app-basic",
+		"description": "Coleção dos endpoints REST do projeto yii2-app-basic.\n\n**Base URL:** http://localhost:8080 (variável `baseUrl`).\n\n**Envelope padrão de resposta:** `{ success: bool, type: string, data | message }`. Em erros 400, `message` traz a string do exception.\n\n**Recursos & cardinalidade:**\n- `user-api` — CRUD de usuários (master).\n- `user-config` — configs key/value por usuário. **1 user → N configs**, com unicidade composta `(user_id, key)`.\n- `user-profile` — dados adicionais do usuário. **1 user → 1 profile** (`user_id` é unique).\n- `user-profile-setting` — preferências do profile. **1 profile → N settings** + campo `url`. POST aceita objeto único, `{ user_profile_id, settings: [...] }` ou array top-level.\n\n**FK em cascata:** deletar um user remove suas configs e profile; deletar um profile remove todos os settings.\n\n**Validação de unicidade composta em configs:** a mesma `key` pode existir para usuários diferentes — só é bloqueada quando já existe a combinação `(user_id, key)`.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "user-api",
+			"description": "CRUD do recurso master `users`. `GET /user-api/:id` retorna o user com `configs[]` e `profiles[]` aninhados (o profile, se existir, vem como único item da array — relação 1:1).",
+			"item": [
+				{
+					"name": "Index - GET /user-api",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-api",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-api"]
+						},
+						"description": "Lista todos os usuários (com inner join na primeira config — comportamento legado do findAll)."
+					}
+				},
+				{
+					"name": "View - GET /user-api/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-api/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-api", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1", "description": "ID do usuário" }
+							]
+						},
+						"description": "Retorna o user com `configs[]` (todas) e `profiles[]` (no máximo 1 — relação 1:1)."
+					}
+				},
+				{
+					"name": "Create - POST /user-api",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Anderson\",\n    \"email\": \"anderson@example.com\",\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-api",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-api"]
+						},
+						"description": "Cria um user. Retorna apenas uma string de sucesso — o id não vem na resposta (consultar via Index e localizar pelo email único)."
+					}
+				},
+				{
+					"name": "Update - PUT /user-api/:id",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Anderson Atualizado\",\n    \"email\": \"anderson.novo@example.com\",\n    \"is_active\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-api/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-api", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete - DELETE /user-api/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-api/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-api", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						},
+						"description": "204 No Content. Configs e profile do user são removidos em cascata pela FK."
+					}
+				}
+			]
+		},
+		{
+			"name": "user-config",
+			"description": "Configs key/value de um usuário. Unicidade composta `(user_id, key)`: a mesma key pode existir para outros usuários, mas não duplicada para o mesmo user.",
+			"item": [
+				{
+					"name": "Index - GET /user-config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-config",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-config"]
+						},
+						"description": "Lista todas as configs de todos os users."
+					}
+				},
+				{
+					"name": "View - GET /user-config/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-config/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-config", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Create - POST /user-config",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"key\": \"theme\",\n    \"value\": \"dark\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-config",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-config"]
+						},
+						"description": "201. Rejeita (400) se já existir a combinação `(user_id, key)`. `value` é opcional."
+					}
+				},
+				{
+					"name": "Update - PUT /user-config/:id",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"key\": \"theme\",\n    \"value\": \"light\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-config/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-config", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						},
+						"description": "Atualização parcial (campos omitidos preservam valor). Mudar `key` para uma já existente naquele user é rejeitado (validação unique composta ignora o próprio registro)."
+					}
+				},
+				{
+					"name": "Delete - DELETE /user-config/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-config/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-config", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						},
+						"description": "204 No Content."
+					}
+				}
+			]
+		},
+		{
+			"name": "user-profile",
+			"description": "Dados adicionais (telefone, bio, avatar). Relação **1:1** com user — `user_id` é unique. Tentar criar um segundo profile para o mesmo user é rejeitado.",
+			"item": [
+				{
+					"name": "Index - GET /user-profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile"]
+						}
+					}
+				},
+				{
+					"name": "View - GET /user-profile/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-profile/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Create - POST /user-profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"phone\": \"+55 11 99999-0000\",\n    \"birth_date\": \"1995-08-21\",\n    \"bio\": \"Desenvolvedor PHP estudando Yii2.\",\n    \"avatar_url\": \"https://exemplo.com/avatar.png\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile"]
+						},
+						"description": "201. `birth_date` no formato `YYYY-MM-DD`. Rejeita (400) se o user já tem profile (unique)."
+					}
+				},
+				{
+					"name": "Update - PUT /user-profile/:id",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+55 11 98888-7777\",\n    \"birth_date\": \"1995-08-21\",\n    \"bio\": \"Bio atualizada.\",\n    \"avatar_url\": \"https://exemplo.com/novo.png\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-profile/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						},
+						"description": "Atualização parcial. `user_id` não é atualizável."
+					}
+				},
+				{
+					"name": "Delete - DELETE /user-profile/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-profile/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						},
+						"description": "204 No Content. O setting do profile é removido em cascata."
+					}
+				}
+			]
+		},
+		{
+			"name": "user-profile-setting",
+			"description": "Preferências do profile (theme, language, timezone, notificações, url). Relação **1:N** com profile — um profile pode ter vários settings. POST aceita 3 formatos: objeto único, `{ user_profile_id, settings: [...] }` ou array top-level (todos atomicamente em uma transação).",
+			"item": [
+				{
+					"name": "Index - GET /user-profile-setting",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-profile-setting",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile-setting"]
+						},
+						"description": "Lista todos os settings. Retorna 400 se a tabela estiver vazia (padrão do projeto)."
+					}
+				},
+				{
+					"name": "View - GET /user-profile-setting/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-profile-setting/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile-setting", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Create single - POST /user-profile-setting",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_profile_id\": 1,\n    \"theme\": \"dark\",\n    \"language\": \"pt-BR\",\n    \"timezone\": \"America/Sao_Paulo\",\n    \"notifications_enabled\": true,\n    \"url\": \"https://exemplo.com/dashboard\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-profile-setting",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile-setting"]
+						},
+						"description": "201. `theme` aceita `light|dark`. Campos opcionais usam defaults (light, pt-BR, America/Sao_Paulo, true, null)."
+					}
+				},
+				{
+					"name": "Create bulk (header + settings) - POST /user-profile-setting",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_profile_id\": 1,\n    \"settings\": [\n        {\n            \"theme\": \"dark\",\n            \"language\": \"pt-BR\",\n            \"timezone\": \"America/Sao_Paulo\",\n            \"notifications_enabled\": true,\n            \"url\": \"https://exemplo.com/dashboard\"\n        },\n        {\n            \"theme\": \"light\",\n            \"language\": \"en\",\n            \"timezone\": \"UTC\",\n            \"notifications_enabled\": false,\n            \"url\": \"https://exemplo.com/admin\"\n        },\n        {\n            \"theme\": \"dark\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-profile-setting",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile-setting"]
+						},
+						"description": "201. **Formato preferido para criação em massa no mesmo profile.** O `user_profile_id` é informado uma única vez no topo e aplicado a todos os itens de `settings[]` que não tragam o seu próprio. Se um item declarar `user_profile_id`, ele tem precedência sobre o do topo. Tudo na mesma transação — se um item falhar, nada é gravado e a mensagem aponta `[item #N]`."
+					}
+				},
+				{
+					"name": "Create bulk (array top-level) - POST /user-profile-setting",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"user_profile_id\": 1,\n        \"theme\": \"dark\",\n        \"url\": \"https://exemplo.com/a\"\n    },\n    {\n        \"user_profile_id\": 2,\n        \"theme\": \"light\",\n        \"url\": \"https://exemplo.com/b\"\n    }\n]"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-profile-setting",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile-setting"]
+						},
+						"description": "Formato alternativo quando os settings em massa são para profiles **diferentes** — cada item carrega o seu próprio `user_profile_id`. Mesma garantia transacional."
+					}
+				},
+				{
+					"name": "Update - PUT /user-profile-setting/:id",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"theme\": \"light\",\n    \"language\": \"en\",\n    \"timezone\": \"UTC\",\n    \"notifications_enabled\": false,\n    \"url\": \"https://exemplo.com/novo\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user-profile-setting/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile-setting", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						},
+						"description": "Atualização parcial. `user_profile_id` não é atualizável."
+					}
+				},
+				{
+					"name": "Delete - DELETE /user-profile-setting/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-profile-setting/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile-setting", ":id"],
+							"variable": [
+								{ "key": "id", "value": "1" }
+							]
+						},
+						"description": "204 No Content."
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

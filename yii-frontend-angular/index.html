@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-br" ng-app="yiiApp">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yii2 + AngularJS — Estudo</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body { padding-top: 70px; background: #f7f8fa; }
+        .nav-tabs .nav-link { cursor: pointer; }
+        pre.json { background:#0d1117; color:#c9d1d9; padding: .75rem; border-radius:.375rem; font-size:.8rem;}
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" ui-sref="users">
+            <i class="bi bi-people-fill"></i> Yii2 - Angular 
+        </a>
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link" ui-sref="users" ui-sref-active="active">Usuários</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" ui-sref="newUser" ui-sref-active="active">Novo</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<main class="container">
+    <div ui-view></div>
+</main>
+
+<!-- Vendor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@uirouter/angularjs@1.0.30/release/angular-ui-router.min.js"></script>
+
+<!-- App -->
+<script src="app/app.js"></script>
+<script src="app/filters/sqlDate.js"></script>
+<script src="app/directives/phoneMask.js"></script>
+<script src="app/services/apiConfig.js"></script>
+<script src="app/services/userService.js"></script>
+<script src="app/services/userConfigService.js"></script>
+<script src="app/services/userProfileService.js"></script>
+<script src="app/services/userProfileSettingService.js"></script>
+<script src="app/controllers/userListCtrl.js"></script>
+<script src="app/controllers/userCreateCtrl.js"></script>
+<script src="app/controllers/userEditCtrl.js"></script>
+<script src="app/controllers/userTabInfoCtrl.js"></script>
+<script src="app/controllers/userTabConfigsCtrl.js"></script>
+<script src="app/controllers/userTabProfilesCtrl.js"></script>
+
+</body>
+</html>

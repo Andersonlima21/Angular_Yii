@@ -1,0 +1,32 @@
+'use strict';
+
+// Wrapper sobre /user-config — backend agora tem CRUD completo.
+angular.module('yiiApp').factory('userConfigService', ['$http', 'API_BASE_URL',
+    function ($http, API_BASE_URL) {
+
+        var url = API_BASE_URL + '/user-config';
+
+        function unwrap(resp) { return resp.data && resp.data.data; }
+        function rejectWithMessage(err) {
+            var msg = (err && err.data && err.data.message) || 'Erro desconhecido na requisição.';
+            return Promise.reject(new Error(msg));
+        }
+
+        return {
+            findAll: function () {
+                return $http.get(url).then(unwrap, rejectWithMessage);
+            },
+            findById: function (id) {
+                return $http.get(url + '/' + id).then(unwrap, rejectWithMessage);
+            },
+            create: function (body) {
+                return $http.post(url, body).then(unwrap, rejectWithMessage);
+            },
+            update: function (id, body) {
+                return $http.put(url + '/' + id, body).then(unwrap, rejectWithMessage);
+            },
+            remove: function (id) {
+                return $http.delete(url + '/' + id).then(function () { return true; }, rejectWithMessage);
+            }
+        };
+    }]);

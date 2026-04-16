@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Listenx/Documents/estudo/yii2-app-basic/controllers/**)",
+      "Read(//c/Users/Listenx/Documents/estudo/**)"
+    ]
+  }
+}
