@@ -39,6 +39,7 @@ class UserConfigService
                 throw new ServerErrorHttpException('Nenhuma configuração encontrada!');
             }
 
+            $retorno = [];
             foreach ($data as $item) {
                 $retorno[] = [
                     'id' => (int)$item['id'],
