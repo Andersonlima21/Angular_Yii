@@ -3,8 +3,6 @@
 namespace app\services;
 
 use app\models\UserApi;
-use app\models\UserConfig;
-use app\models\UserProfile;
 use Throwable;
 use Yii;
 use yii\db\Exception;
@@ -16,17 +14,19 @@ class UserService
 {
     private UserConfigService $configService;
     private UserProfileService $profileService;
+    private UserFilterHelper $filterHelper;
 
-    public function __construct(UserConfigService $configService, UserProfileService $profileService)
+    public function __construct(UserConfigService $configService, UserProfileService $profileService, UserFilterHelper $filterHelper)
     {
         $this->configService = $configService;
         $this->profileService = $profileService;
+        $this->filterHelper = $filterHelper;
     }
 
     // Ganho em perfomance via comparação com o profile gerado no xdebuger
     // porém a hidratação/manipulação é manual, e perco o validate dos rules da model
     // Memoria utilizada contagem final 7,26mb
-    public function findAll(): array
+    public function findAll(array $filtros = []): array
     {
         try {
             $data = (new Query())
@@ -44,8 +44,12 @@ class UserService
                     'email' => $item['email'],
                     'is_active' => (bool)$item['is_active'],
                     'created_at' => $item['created_at'],
-                    'updated_at' => $item['updated_at']
+                    'updated_at' => $item['updated_at'],
                 ];
+            }
+
+            if (!empty($filtros)) {
+                $retorno = $this->filterHelper->handleArray($retorno, $filtros);
             }
 
             return $retorno;
@@ -225,7 +229,7 @@ class UserService
 
             Yii::$app->db->createCommand()
                 ->update(UserApi::tableName(), [
-                    'is_active'  => (int)$newStatus,
+                    'is_active' => (int)$newStatus,
                     'updated_at' => date('Y-m-d H:i:s'),
                 ], ['id' => $id])
                 ->execute();
@@ -233,9 +237,9 @@ class UserService
             $transaction->commit();
 
             return [
-                'id'        => (int)$user['id'],
+                'id' => (int)$user['id'],
                 'is_active' => $newStatus,
-                'message'   => 'Usuário ' . ($newStatus ? 'ativado' : 'inativado') . ' com sucesso.',
+                'message' => 'Usuário ' . ($newStatus ? 'ativado' : 'inativado') . ' com sucesso.',
             ];
 
         } catch (Throwable $e) {

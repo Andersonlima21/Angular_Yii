@@ -5,18 +5,74 @@ angular.module('yiiApp').component('userList', {
     controller: ['$state', 'userService', function ($state, userService) {
         var $ctrl = this;
 
-        $ctrl.users   = [];
-        $ctrl.filter  = { q: '', ativo: '' };
+        // Resultado da requisição — shape muda conforme o modo
+        $ctrl.users  = [];   // modo normal: lista plana de usuários
+        $ctrl.grupos = [];   // modo chunk:  array de arrays (uma tabela por grupo)
+        $ctrl.resumo = [];   // modo resumo: [{status, total}]
+        $ctrl.modo   = 'normal';
+
         $ctrl.loading = false;
         $ctrl.error   = null;
 
+        // Filtros — q é client-side; os demais vão como query params pro backend
+        $ctrl.filter = {
+            q:           '',      // busca por nome/email (client-side)
+            status:      '',      // 'ativo' | 'inativo' | ''   → array_filter no back
+            ordenacao:   '',      // 'az' | 'za' | ''           → usort no back
+            inverter:    false,   //                            → array_reverse no back
+            semDominio:  false,   //                            → array_map no back
+            pagina:      false,   // ativa paginação            → array_slice no back
+            paginaAtual: 1,
+            porPagina:   3,
+            chunk:       '',      // número N (divide em grupos) → array_chunk no back
+            resumo:      false,   //                            → array_reduce no back
+        };
+
         $ctrl.$onInit = function () { $ctrl.load(); };
+
+        // Chamado ao mudar qualquer filtro backend — reseta para página 1
+        $ctrl.aplicarFiltros = function () {
+            $ctrl.filter.paginaAtual = 1;
+            $ctrl.load();
+        };
 
         $ctrl.load = function () {
             $ctrl.loading = true;
             $ctrl.error   = null;
-            userService.findAll().then(function (data) {
-                $ctrl.users = data || [];
+
+            var params = {};
+            if ($ctrl.filter.status)     params.status      = $ctrl.filter.status;
+            if ($ctrl.filter.ordenacao)  params.ordenacao   = $ctrl.filter.ordenacao;
+            if ($ctrl.filter.inverter)   params.inverter    = 1;
+            if ($ctrl.filter.semDominio) params.sem_dominio = 1;
+            if ($ctrl.filter.resumo)     params.resumo      = 1;
+            if ($ctrl.filter.chunk)      params.chunk       = parseInt($ctrl.filter.chunk, 10);
+            if ($ctrl.filter.pagina) {
+                params.pagina     = $ctrl.filter.paginaAtual;
+                params.por_pagina = $ctrl.filter.porPagina;
+            }
+
+            userService.findAll(params).then(function (data) {
+                data = data || [];
+
+                if ($ctrl.filter.resumo) {
+                    $ctrl.modo   = 'resumo';
+                    $ctrl.resumo = data;
+                    $ctrl.users  = [];
+                    $ctrl.grupos = [];
+
+                } else if ($ctrl.filter.chunk && data.length > 0 && Array.isArray(data[0])) {
+                    $ctrl.modo   = 'chunk';
+                    $ctrl.grupos = data;
+                    $ctrl.users  = [];
+                    $ctrl.resumo = [];
+
+                } else {
+                    $ctrl.modo   = 'normal';
+                    $ctrl.users  = data;
+                    $ctrl.grupos = [];
+                    $ctrl.resumo = [];
+                }
             }, function (err) {
                 $ctrl.error = err.message;
             }).finally(function () {
@@ -24,13 +80,27 @@ angular.module('yiiApp').component('userList', {
             });
         };
 
+        // Filtro de texto — client-side, mantido como estava
         $ctrl.matchFilter = function (user) {
             var q = ($ctrl.filter.q || '').toLowerCase().trim();
-            if (q && (user.name  || '').toLowerCase().indexOf(q) === -1
-                  && (user.email || '').toLowerCase().indexOf(q) === -1) return false;
-            if ($ctrl.filter.ativo === 'sim' && !user.is_active) return false;
-            if ($ctrl.filter.ativo === 'nao' &&  user.is_active) return false;
-            return true;
+            if (!q) return true;
+            return (user.name  || '').toLowerCase().indexOf(q) !== -1
+                || (user.email || '').toLowerCase().indexOf(q) !== -1;
+        };
+
+        // Paginação (array_slice)
+        $ctrl.paginaAnterior = function () {
+            if ($ctrl.filter.paginaAtual > 1) {
+                $ctrl.filter.paginaAtual--;
+                $ctrl.load();
+            }
+        };
+        $ctrl.proximaPagina = function () {
+            $ctrl.filter.paginaAtual++;
+            $ctrl.load();
+        };
+        $ctrl.temProximaPagina = function () {
+            return $ctrl.users.length >= $ctrl.filter.porPagina;
         };
 
         $ctrl.edit   = function (id) { $state.go('editUser.info', { id: id }); };

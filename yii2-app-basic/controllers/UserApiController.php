@@ -70,17 +70,13 @@ class UserApiController extends Controller
     public function actionIndex(): array
     {
         try {
-            return [
-                'success' => true,
-                'type' => 'success',
-                'data' => $this->service->findAll()
-            ];
+            $filtros = Yii::$app->request->getQueryParams();
+            $data    = $this->service->findAll($filtros);
+
+            return ['success' => true, 'type' => 'success', 'data' => $data];
         } catch (Throwable $e) {
             Yii::$app->response->statusCode = 400;
-            return [
-                'success' => false,
-                'type' => 'exception',
-                'message' => $e->getMessage()];
+            return ['success' => false, 'type' => 'exception', 'message' => $e->getMessage()];
         }
     }
 

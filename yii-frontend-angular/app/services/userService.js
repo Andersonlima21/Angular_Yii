@@ -17,8 +17,8 @@ angular.module('yiiApp').factory('userService', ['$http', 'API_BASE_URL',
         }
 
         return {
-            findAll: function () {
-                return $http.get(url).then(unwrap, rejectWithMessage);
+            findAll: function (params) {
+                return $http.get(url, { params: params || {} }).then(unwrap, rejectWithMessage);
             },
             findById: function (id) {
                 return $http.get(url + '/' + id).then(unwrap, rejectWithMessage);
