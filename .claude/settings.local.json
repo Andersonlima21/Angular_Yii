@@ -5,7 +5,30 @@
       "Bash(composer --version)",
       "Bash(mkdir -p \"C:/Users/Listenx/Documents/estudo/.claude/agents\")",
       "Bash(mkdir -p \"C:/Users/Listenx/Documents/estudo/yii2-app-basic/.claude/agents\")",
-      "Bash(mkdir -p \"C:/Users/Listenx/Documents/estudo/yii-frontend-angular/.claude/agents\")"
+      "Bash(mkdir -p \"C:/Users/Listenx/Documents/estudo/yii-frontend-angular/.claude/agents\")",
+      "Bash(php -r ' *)",
+      "Bash(php --version)",
+      "Bash(php.exe --version)",
+      "Bash(php yii *)",
+      "Bash(curl -s -i \"http://localhost:8080/user-api\" -H \"Accept: application/json\")",
+      "Bash(curl -s -i \"http://localhost:8080/\" -H \"Accept: application/json\")",
+      "Bash(curl -s -i \"http://localhost:8080/index.php/user-api\" -H \"Accept: application/json\")",
+      "Bash(curl -v \"http://localhost:8080/user-api\")",
+      "Bash(php -r \"echo php_ini_loaded_file\\(\\);\")",
+      "Bash(php -r \"echo xdebug_info\\(\\);\")",
+      "Bash(php -r \"var_dump\\(ini_get\\('xdebug.mode'\\)\\);\")",
+      "Bash(netstat -ano)",
+      "Bash(tasklist *)",
+      "Bash(cmd *)",
+      "Bash(curl -s \"http://localhost:8080/\")",
+      "Bash(curl -s \"http://localhost:8080/site/index\")",
+      "Bash(curl -s -i \"http://localhost:8099/user-api\" -H \"Accept: application/json\")",
+      "Bash(curl *)",
+      "Bash(php -d display_errors=1 -d error_reporting=E_ALL index.php)",
+      "Bash(php -d display_errors=1 index.php)",
+      "Bash(cat /tmp/yii_8095.log)",
+      "Bash(curl -s -i \"http://localhost:8095/user-api\" -H \"Accept: application/json\")",
+      "Bash(python -m json.tool)"
     ]
   }
 }

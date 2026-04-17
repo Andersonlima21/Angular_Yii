@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php yii:*)"
+      "Bash(php yii:*)",
+      "Read(//mnt/c/Users/Listenx/.claude/**)",
+      "Read(//c/Users/Listenx/.claude/**)",
+      "Read(//c/Users/Listenx/Documents/estudo/Angular_Yii/.claude/**)",
+      "Read(//c/Users/Listenx/Documents/estudo/Angular_Yii/.claude/agents/**)"
     ]
   }
 }
