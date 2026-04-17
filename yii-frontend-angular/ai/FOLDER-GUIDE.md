@@ -151,6 +151,8 @@ Fora da `/ai/` mas essenciais para o bootstrap do Claude:
 
 ## Como replicar em outro projeto
 
+### Opção A — Script automático (quando disponível)
+
 Use `scripts/bootstrap-ai-to-project.mjs` na raiz deste projeto:
 
 ```bash
@@ -165,3 +167,93 @@ O script:
 5. Imprime relatório do que foi detectado e criado
 
 Use `--force` para sobrescrever um `ai/` existente e `--dry-run` para só ver o que seria feito.
+
+---
+
+### Opção B — Bootstrap manual via Claude Code (passo a passo)
+
+Quando o script não estiver disponível, peça ao Claude para executar o bootstrap manual. O prompt exato:
+
+```
+BOOTSTRAP MANUAL da pasta ai/:
+1. Leia o FOLDER-GUIDE.md
+2. Explore o projeto: package.json (ou composer.json), estrutura de src/, stack detectada
+3. Crie todos os arquivos listados abaixo na ordem indicada
+```
+
+#### Ordem de criação (respeitar a sequência)
+
+**Fase 1 — Estrutura base** (criar primeiro, pois outros dependem deles):
+
+| Arquivo | Conteúdo mínimo |
+|---|---|
+| `ai/README.md` | Entrypoint: context budget, índice de seções, regra de conflito com CLAUDE.md |
+| `ai/context-pack.md` | Stack detectada, envelope de API, estrutura de pastas, anti-padrões, workarounds, ordem de scripts, convenções |
+| `ai/governance.md` | Protocolo de mudança de regras congeladas, matriz de ownership |
+
+**Fase 2 — Agentes** (`ai/agents/`):
+
+Criar um arquivo `.md` por agente com frontmatter `name` e `description`. Agentes mínimos obrigatórios:
+
+| Arquivo | Foco |
+|---|---|
+| `frontend-developer.md` | Framework de UI encontrado, padrões de componente, routing |
+| `backend-integration.md` | Contrato de API, CORS, envelope de resposta |
+| `tech-lead.md` | Decisões arquiteturais, orquestração, planejamento |
+| `code-reviewer.md` | Checklist de PR específico para a stack |
+| `qa-engineer.md` | Casos de teste, edge cases, bug report template |
+| `debugger.md` | Problemas comuns da stack, processo de investigação |
+| `devops.md` | Como subir o ambiente, comandos, ports, CI |
+| `handoffs.md` | Template e protocolo de handoff entre sessões |
+| `README.md` | Catálogo: mapa task → agente |
+
+Agentes opcionais (criar se o projeto justificar):
+- `performance-engineer.md`, `ui-ux-assistant.md`, `documentation-writer.md`
+
+**Fase 3 — Documentação de API** (`ai/docs/`):
+
+Um arquivo por recurso/endpoint. Conteúdo obrigatório:
+- Base URL
+- Operações (GET/POST/PUT/PATCH/DELETE) com payloads de exemplo
+- Workarounds e exceções conhecidas
+
+**Fase 4 — Templates e Workflows** (`ai/templates/`, `ai/workflows/`):
+
+Copiar/adaptar os templates genéricos:
+- `templates/plan.template.md`
+- `templates/postmortem.template.md`
+- `templates/adr.template.md`
+- `workflows/README.md`, `feature-delivery.md`, `testing.md`, `postmortem-loop.md`
+
+**Fase 5 — Standards e Skills** (`ai/standards/`, `ai/skills/`):
+
+- `standards/README.md` e `standards/changelog.md` (obrigatórios)
+- Demais standards: criar sob demanda conforme o projeto avança
+- `skills/README.md` (obrigatório, catálogo pode estar vazio inicialmente)
+
+**Fase 6 — Pastas vazias** (criar apenas o README como placeholder):
+- `ai/plans/` — planos de features (criados conforme demanda)
+- `ai/layouts/` — referências visuais (opcional)
+
+#### O que extrair para o `context-pack.md`
+
+Varrer o projeto antes de escrever. Coletar:
+- [ ] Framework e versão (package.json / composer.json)
+- [ ] Bundler ou ausência dele (CDN-only, Vite, Webpack…)
+- [ ] Padrão de resposta da API (envelope, shape)
+- [ ] Estrutura de pastas (`src/` ou `app/`)
+- [ ] Padrão de roteamento (file-based, config-based, nested states…)
+- [ ] Workarounds já existentes no código
+- [ ] Anti-padrões identificados durante a leitura
+- [ ] Convenções de nomenclatura observadas
+- [ ] Ordem de carregamento de scripts (se sem bundler)
+- [ ] Comentários em qual idioma (preservar)
+
+#### Verificação pós-bootstrap
+
+Confirmar em 5 bullets:
+1. `ai/README.md` e `ai/context-pack.md` existem e têm conteúdo
+2. Todos os agentes mínimos estão em `ai/agents/`
+3. Cada endpoint usado no código tem doc em `ai/docs/`
+4. Templates existem em `ai/templates/`
+5. `ai/standards/changelog.md` registra a criação inicial com data

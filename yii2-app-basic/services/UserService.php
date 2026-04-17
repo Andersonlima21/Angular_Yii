@@ -23,9 +23,6 @@ class UserService
         $this->filterHelper = $filterHelper;
     }
 
-    // Ganho em perfomance via comparação com o profile gerado no xdebuger
-    // porém a hidratação/manipulação é manual, e perco o validate dos rules da model
-    // Memoria utilizada contagem final 7,26mb
     public function findAll(array $filtros = []): array
     {
         try {
@@ -56,40 +53,6 @@ class UserService
 
         } catch (Throwable $e) {
             throw new ServerErrorHttpException('Falha na listagem de users. ' . $e->getMessage());
-        }
-    }
-
-    // Aqui perco em perfomance, mas ganho em expressividade de código
-    // Memmoria utilizada contagem final 7,53mb
-    public function findAll_v2(): array
-    {
-        try {
-            $data = UserApi::find()
-                ->select(['id', 'name', 'email', 'is_active', 'created_at', 'updated_at'])
-                ->orderBy(['id' => SORT_ASC])
-                ->asArray()
-                ->all();
-
-            if (empty($data)) {
-                throw new Exception('Não foram encontrados registros na tabela de users');
-            }
-
-            $retorno = [];
-            foreach ($data as $item) {
-                $retorno[] = [
-                    'id' => (int)$item['id'],
-                    'name' => $item['name'],
-                    'email' => $item['email'],
-                    'is_active' => (bool)$item['is_active'],
-                    'created_at' => $item['created_at'],
-                    'updated_at' => $item['updated_at'],
-                ];
-            }
-
-            return $retorno;
-
-        } catch (Throwable $e) {
-            throw new ServerErrorHttpException('Falha na listagem de users (v2). ' . $e->getMessage());
         }
     }
 
