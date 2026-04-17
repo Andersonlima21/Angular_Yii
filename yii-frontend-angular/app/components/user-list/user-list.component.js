@@ -26,7 +26,16 @@ angular.module('yiiApp').component('userList', {
             porPagina:   3,
             chunk:       '',      // número N (divide em grupos) → array_chunk no back
             resumo:      false,   //                            → array_reduce no back
+            // Novos filtros backend
+            busca:       '',      // pesquisa server-side por nome ou email
+            limite:      '',      // teto de resultados
+            ordenar_por: '',      // campo: id | name | email | created_at | updated_at
+            direcao:     'asc',   // 'asc' | 'desc'
+            campos:      [],      // projeção de campos (array_keys do objeto retornado)
+            coluna:      '',      // extrai array plano de uma coluna
         };
+
+        $ctrl.coluna = [];
 
         $ctrl.$onInit = function () { $ctrl.load(); };
 
@@ -51,33 +60,55 @@ angular.module('yiiApp').component('userList', {
                 params.pagina     = $ctrl.filter.paginaAtual;
                 params.por_pagina = $ctrl.filter.porPagina;
             }
+            if ($ctrl.filter.busca)                     params.busca       = $ctrl.filter.busca;
+            if ($ctrl.filter.limite)                    params.limite      = parseInt($ctrl.filter.limite, 10);
+            if ($ctrl.filter.ordenar_por)               { params.ordenar_por = $ctrl.filter.ordenar_por; params.direcao = $ctrl.filter.direcao; }
+            if ($ctrl.filter.campos.length)             params['campos[]'] = $ctrl.filter.campos;
+            if ($ctrl.filter.coluna)                    params.coluna      = $ctrl.filter.coluna;
 
             userService.findAll(params).then(function (data) {
                 data = data || [];
 
-                if ($ctrl.filter.resumo) {
+                if ($ctrl.filter.coluna) {
+                    $ctrl.modo   = 'coluna';
+                    $ctrl.coluna = data;
+                    $ctrl.users  = [];
+                    $ctrl.grupos = [];
+                    $ctrl.resumo = [];
+
+                } else if ($ctrl.filter.resumo) {
                     $ctrl.modo   = 'resumo';
                     $ctrl.resumo = data;
                     $ctrl.users  = [];
                     $ctrl.grupos = [];
+                    $ctrl.coluna = [];
 
                 } else if ($ctrl.filter.chunk && data.length > 0 && Array.isArray(data[0])) {
                     $ctrl.modo   = 'chunk';
                     $ctrl.grupos = data;
                     $ctrl.users  = [];
                     $ctrl.resumo = [];
+                    $ctrl.coluna = [];
 
                 } else {
                     $ctrl.modo   = 'normal';
                     $ctrl.users  = data;
                     $ctrl.grupos = [];
                     $ctrl.resumo = [];
+                    $ctrl.coluna = [];
                 }
             }, function (err) {
                 $ctrl.error = err.message;
             }).finally(function () {
                 $ctrl.loading = false;
             });
+        };
+
+        $ctrl.toggleCampo = function (campo) {
+            var idx = $ctrl.filter.campos.indexOf(campo);
+            if (idx === -1) { $ctrl.filter.campos.push(campo); }
+            else            { $ctrl.filter.campos.splice(idx, 1); }
+            $ctrl.aplicarFiltros();
         };
 
         // Filtro de texto — client-side, mantido como estava

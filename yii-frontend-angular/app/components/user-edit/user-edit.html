@@ -21,39 +21,36 @@
     </button>
 </div>
 
-<!-- Layout: pills verticais + conteúdo -->
-<div class="row g-0">
+<!-- Nav-tabs horizontais -->
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center gap-2"
+           ui-sref="editUser.info({id: $ctrl.userId})"
+           ui-sref-active="active">
+            <i class="bi bi-person"></i>
+            Info
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center gap-2"
+           ui-sref="editUser.configs({id: $ctrl.userId})"
+           ui-sref-active="active">
+            <i class="bi bi-sliders"></i>
+            Configs
+            <span class="badge bg-secondary">{{ $ctrl.user.configs.length || 0 }}</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center gap-2"
+           ui-sref="editUser.profiles({id: $ctrl.userId})"
+           ui-sref-active="active">
+            <i class="bi bi-person-vcard"></i>
+            Profile
+            <i class="bi"
+               ng-class="$ctrl.user.profiles.length ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted'"></i>
+        </a>
+    </li>
+</ul>
 
-    <!-- Pills verticais -->
-    <div class="col-md-2 col-12 mb-3 mb-md-0">
-        <div class="nav flex-row flex-md-column nav-pills gap-1 pe-md-3">
-            <a class="nav-link d-flex align-items-center gap-2"
-               ui-sref="editUser.info({id: $ctrl.userId})"
-               ui-sref-active="active">
-                <i class="bi bi-person"></i>
-                <span>Info</span>
-            </a>
-            <a class="nav-link d-flex align-items-center gap-2"
-               ui-sref="editUser.configs({id: $ctrl.userId})"
-               ui-sref-active="active">
-                <i class="bi bi-sliders"></i>
-                <span>Configs</span>
-                <span class="badge bg-secondary ms-auto d-none d-md-inline">{{ $ctrl.user.configs.length || 0 }}</span>
-            </a>
-            <a class="nav-link d-flex align-items-center gap-2"
-               ui-sref="editUser.profiles({id: $ctrl.userId})"
-               ui-sref-active="active">
-                <i class="bi bi-person-vcard"></i>
-                <span>Profile</span>
-                <i class="bi ms-auto d-none d-md-inline"
-                   ng-class="$ctrl.user.profiles.length ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted'"></i>
-            </a>
-        </div>
-    </div>
-
-    <!-- Conteúdo da tab -->
-    <div class="col-md-10 col-12">
-        <div ui-view></div>
-    </div>
-
-</div>
+<!-- Conteúdo da tab ativa -->
+<div ui-view></div>

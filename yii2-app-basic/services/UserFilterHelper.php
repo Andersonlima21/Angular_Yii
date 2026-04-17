@@ -52,7 +52,7 @@ class UserFilterHelper
                 return $carry;
             }, ['ativos' => 0, 'inativos' => 0]);
             return [
-                ['status' => 'Ativos',   'total' => $contagem['ativos']],
+                ['status' => 'Ativos', 'total' => $contagem['ativos']],
                 ['status' => 'Inativos', 'total' => $contagem['inativos']],
             ];
         }
@@ -69,8 +69,62 @@ class UserFilterHelper
         // simulando paginação server-side sem precisar de LIMIT/OFFSET(pular N linhas) no SQL.
         if (!empty($filtros['pagina'])) {
             $porPagina = max(1, (int)($filtros['por_pagina'] ?? 3));
-            $offset    = (max(1, (int)$filtros['pagina']) - 1) * $porPagina;
-            $users     = array_slice($users, $offset, $porPagina);
+            $offset = (max(1, (int)$filtros['pagina']) - 1) * $porPagina;
+            $users = array_slice($users, $offset, $porPagina);
+        }
+
+        // array_filter + stripos — busca textual case-insensitive por substring.
+        // stripos retorna a posição (pode ser 0, que é falsy!) ou false;
+        // por isso a comparação obrigatória é !== false, nunca empty() ou !.
+        // Pesquisa simultânea em 'name' e 'email': basta um dos campos conter o termo.
+        if (!empty($filtros['busca'])) {
+            $termo = $filtros['busca'];
+            $users = array_values(
+                array_filter($users, fn($u) => stripos($u['name'], $termo) !== false ||
+                    stripos($u['email'], $termo) !== false
+                )
+            );
+        }
+
+        // array_intersect_key + array_fill_keys — projeção de campos (field projection).
+        // array_fill_keys transforma ['name', 'email'] em ['name' => true, 'email' => true],
+        // servindo de "máscara". array_intersect_key mantém apenas as chaves presentes
+        // nessa máscara — o chamador decide quais campos receber sem conhecer a estrutura interna.
+        if (!empty($filtros['campos']) && is_array($filtros['campos'])) {
+            $mascara = array_fill_keys($filtros['campos'], true);
+            $users = array_map(fn($u) => array_intersect_key($u, $mascara), $users);
+        }
+
+        // usort com spaceship operator (<=>) e campo dinâmico — generaliza a ordenação
+        // para qualquer campo do array sem precisar de um if por campo.
+        // Spaceship retorna -1, 0 ou 1 comparando dois valores (funciona com int, float e string).
+        // Multiplicar pelo $direcao (1 ou -1) inverte a ordem sem duplicar o comparador.
+        if (!empty($filtros['ordenar_por'])) {
+            $campo = $filtros['ordenar_por'];
+            $direcao = (($filtros['direcao'] ?? 'asc') === 'desc') ? -1 : 1;
+            usort($users, function ($a, $b) use ($campo, $direcao) {
+                if (!array_key_exists($campo, $a)) return 0;
+                return ($a[$campo] <=> $b[$campo]) * $direcao;
+            });
+        }
+
+        // array_column — extrai uma única coluna de um array multidimensional como array plano.
+        // Útil quando o front precisa apenas de uma lista de ids ou nomes para um select/autocomplete,
+        // sem carregar todos os campos. O segundo argumento é a coluna-valor;
+        // o terceiro (não usado aqui) reindexaria o resultado por outra coluna.
+        if (!empty($filtros['coluna'])) {
+            return array_column($users, $filtros['coluna']);
+        }
+
+        // array_splice — remove elementos do array in-place a partir de um offset.
+        // Diferente do array_slice (que não altera o original e retorna a fatia),
+        // o splice modifica diretamente o array passado por referência e descarta o excedente.
+        // Aqui impõe um teto de resultados independente de paginação — útil para previews.
+        if (!empty($filtros['limite'])) {
+            $n = max(1, (int)$filtros['limite']);
+            if (count($users) > $n) {
+                array_splice($users, $n);
+            }
         }
 
         return $users;

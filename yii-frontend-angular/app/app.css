@@ -73,21 +73,3 @@
 .nav-tabs .nav-link {
   cursor: pointer;
 }
-
-/* =====================
-   Pills verticais (user-edit — Tarefa 5)
-   ===================== */
-.nav-pills .nav-link {
-  color: #495057;
-  font-size: .9rem;
-  cursor: pointer;
-}
-
-.nav-pills .nav-link:hover {
-  background-color: #e9ecef;
-}
-
-.nav-pills .nav-link.active {
-  background-color: var(--bs-primary);
-  color: #fff;
-}

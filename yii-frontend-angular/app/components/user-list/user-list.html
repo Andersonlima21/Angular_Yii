@@ -24,10 +24,14 @@
 
         <hr class="my-2">
 
-        <div class="row g-3">
+        <!-- ── Seção: Campos ── -->
+        <p class="small text-muted fw-semibold mb-2 mt-1">
+            <i class="bi bi-funnel me-1"></i>Campos
+        </p>
+        <div class="row g-3 mb-2">
 
             <!-- Status -->
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label class="form-label small"
                        bs-tooltip="array_filter — filtra registros por status no backend">
                     Status
@@ -35,36 +39,132 @@
                 <select class="form-select form-select-sm"
                         ng-model="$ctrl.filter.status"
                         ng-change="$ctrl.aplicarFiltros()"
-                        ng-disabled="$ctrl.filter.resumo">
+                        ng-disabled="$ctrl.filter.resumo || $ctrl.filter.coluna">
                     <option value="">Todos</option>
                     <option value="ativo">Ativos</option>
                     <option value="inativo">Inativos</option>
                 </select>
             </div>
 
-            <!-- Ordenação -->
-            <div class="col-md-3">
+            <!-- Ordenação usort -->
+            <div class="col-md-4">
                 <label class="form-label small"
                        bs-tooltip="usort — ordena registros por critério no backend">
-                    Ordenação
+                    Ordenação (usort)
                 </label>
                 <select class="form-select form-select-sm"
                         ng-model="$ctrl.filter.ordenacao"
                         ng-change="$ctrl.aplicarFiltros()"
-                        ng-disabled="$ctrl.filter.resumo || $ctrl.filter.inverter">
+                        ng-disabled="$ctrl.filter.resumo || $ctrl.filter.inverter || $ctrl.filter.coluna">
                     <option value="">Padrão (id)</option>
                     <option value="az">Nome A → Z</option>
                     <option value="za">Nome Z → A</option>
                 </select>
             </div>
 
+            <!-- Agrupar em lotes -->
+            <div class="col-md-4">
+                <label class="form-label small"
+                       bs-tooltip="array_chunk — agrupa os registros em lotes de N itens">
+                    Agrupar em lotes de
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" min="1" max="10" placeholder="N usuários"
+                           ng-model="$ctrl.filter.chunk"
+                           ng-change="$ctrl.aplicarFiltros()"
+                           ng-disabled="$ctrl.filter.resumo || $ctrl.filter.pagina || $ctrl.filter.coluna">
+                    <button class="btn btn-outline-secondary"
+                            ng-if="$ctrl.filter.chunk"
+                            ng-click="$ctrl.filter.chunk = ''; $ctrl.aplicarFiltros()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row g-3 mb-3">
+
+            <!-- Busca server-side -->
+            <div class="col-md-4">
+                <label class="form-label small"
+                       bs-tooltip="busca — pesquisa por nome ou email no backend (server-side)">
+                    Busca server-side
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" placeholder="nome ou e-mail"
+                           ng-model="$ctrl.filter.busca"
+                           ng-change="$ctrl.aplicarFiltros()">
+                    <button class="btn btn-outline-secondary"
+                            ng-if="$ctrl.filter.busca"
+                            ng-click="$ctrl.filter.busca = ''; $ctrl.aplicarFiltros()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ordenar por + Direção -->
+            <div class="col-md-5">
+                <label class="form-label small"
+                       bs-tooltip="ordenar_por + direcao — ordenação dinâmica por campo e sentido">
+                    Ordenar por
+                </label>
+                <div class="input-group input-group-sm">
+                    <select class="form-select form-select-sm"
+                            ng-model="$ctrl.filter.ordenar_por"
+                            ng-change="$ctrl.aplicarFiltros()">
+                        <option value="">— campo —</option>
+                        <option value="id">ID</option>
+                        <option value="name">Nome</option>
+                        <option value="email">E-mail</option>
+                        <option value="created_at">Criado em</option>
+                        <option value="updated_at">Atualizado em</option>
+                    </select>
+                    <select class="form-select form-select-sm"
+                            ng-model="$ctrl.filter.direcao"
+                            ng-change="$ctrl.aplicarFiltros()"
+                            ng-disabled="!$ctrl.filter.ordenar_por">
+                        <option value="asc">ASC ↑</option>
+                        <option value="desc">DESC ↓</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Limite -->
+            <div class="col-md-3">
+                <label class="form-label small"
+                       bs-tooltip="limite — teto de resultados retornados pelo backend">
+                    Limite de resultados
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" min="1" placeholder="ex: 5"
+                           ng-model="$ctrl.filter.limite"
+                           ng-change="$ctrl.aplicarFiltros()">
+                    <button class="btn btn-outline-secondary"
+                            ng-if="$ctrl.filter.limite"
+                            ng-click="$ctrl.filter.limite = ''; $ctrl.aplicarFiltros()">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <hr class="my-2">
+
+        <!-- ── Seção: Opções ── -->
+        <p class="small text-muted fw-semibold mb-2">
+            <i class="bi bi-toggles me-1"></i>Opções
+        </p>
+        <div class="row g-2 align-items-start mb-2">
+
             <!-- Inverter ordem -->
-            <div class="col-md-3 d-flex align-items-end">
+            <div class="col-md-3 col-6">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="chkInverter"
                            ng-model="$ctrl.filter.inverter"
                            ng-change="$ctrl.aplicarFiltros()"
-                           ng-disabled="$ctrl.filter.resumo">
+                           ng-disabled="$ctrl.filter.resumo || $ctrl.filter.coluna">
                     <label class="form-check-label small" for="chkInverter"
                            bs-tooltip="array_reverse — inverte a ordem dos resultados">
                         Inverter ordem
@@ -73,12 +173,12 @@
             </div>
 
             <!-- Ocultar domínio -->
-            <div class="col-md-3 d-flex align-items-end">
+            <div class="col-md-3 col-6">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="chkSemDominio"
                            ng-model="$ctrl.filter.semDominio"
                            ng-change="$ctrl.aplicarFiltros()"
-                           ng-disabled="$ctrl.filter.resumo">
+                           ng-disabled="$ctrl.filter.resumo || $ctrl.filter.coluna">
                     <label class="form-check-label small" for="chkSemDominio"
                            bs-tooltip="array_map — transforma o e-mail ocultando o domínio">
                         Ocultar domínio do e-mail
@@ -87,12 +187,12 @@
             </div>
 
             <!-- Paginar -->
-            <div class="col-md-4">
+            <div class="col-md-3 col-6">
                 <div class="form-check mb-1">
                     <input class="form-check-input" type="checkbox" id="chkPagina"
                            ng-model="$ctrl.filter.pagina"
                            ng-change="$ctrl.aplicarFiltros()"
-                           ng-disabled="$ctrl.filter.resumo || $ctrl.filter.chunk">
+                           ng-disabled="$ctrl.filter.resumo || $ctrl.filter.chunk || $ctrl.filter.coluna">
                     <label class="form-check-label small" for="chkPagina"
                            bs-tooltip="array_slice — divide os resultados em páginas">
                         Paginar
@@ -106,35 +206,58 @@
                 </div>
             </div>
 
-            <!-- Agrupar -->
-            <div class="col-md-4">
-                <label class="form-label small"
-                       bs-tooltip="array_chunk — agrupa os registros em lotes de N itens">
-                    Agrupar em lotes de
-                </label>
-                <div class="input-group input-group-sm">
-                    <input type="number" class="form-control" min="1" max="10" placeholder="N usuários"
-                           ng-model="$ctrl.filter.chunk"
-                           ng-change="$ctrl.aplicarFiltros()"
-                           ng-disabled="$ctrl.filter.resumo || $ctrl.filter.pagina">
-                    <button class="btn btn-outline-secondary"
-                            ng-if="$ctrl.filter.chunk"
-                            ng-click="$ctrl.filter.chunk = ''; $ctrl.aplicarFiltros()">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Resumo -->
-            <div class="col-md-4 d-flex align-items-end">
+            <!-- Mostrar resumo -->
+            <div class="col-md-3 col-6">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="chkResumo"
                            ng-model="$ctrl.filter.resumo"
-                           ng-change="$ctrl.aplicarFiltros()">
+                           ng-change="$ctrl.aplicarFiltros()"
+                           ng-disabled="$ctrl.filter.coluna">
                     <label class="form-check-label small" for="chkResumo"
                            bs-tooltip="array_reduce — agrupa e conta ativos/inativos">
                         Mostrar resumo ativos/inativos
                     </label>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Coluna (array plano) + Campos (projeção) -->
+        <div class="row g-2 align-items-start">
+
+            <!-- Coluna -->
+            <div class="col-md-3 col-6">
+                <label class="form-label small"
+                       bs-tooltip="coluna — retorna array plano de valores de um único campo">
+                    Extrair coluna
+                </label>
+                <select class="form-select form-select-sm"
+                        ng-model="$ctrl.filter.coluna"
+                        ng-change="$ctrl.aplicarFiltros()">
+                    <option value="">— desativado —</option>
+                    <option value="id">id</option>
+                    <option value="name">name</option>
+                    <option value="email">email</option>
+                    <option value="is_active">is_active</option>
+                    <option value="created_at">created_at</option>
+                    <option value="updated_at">updated_at</option>
+                </select>
+            </div>
+
+            <!-- Campos (projeção) -->
+            <div class="col-md-9 col-12">
+                <label class="form-label small"
+                       bs-tooltip="campos[] — projeção: retorna só as chaves selecionadas por objeto">
+                    Projeção de campos
+                </label>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="form-check form-check-inline" ng-repeat="c in ['id','name','email','is_active','created_at','updated_at']">
+                        <input class="form-check-input" type="checkbox" id="campo_{{ c }}"
+                               ng-checked="$ctrl.filter.campos.indexOf(c) !== -1"
+                               ng-click="$ctrl.toggleCampo(c)"
+                               ng-disabled="$ctrl.filter.coluna">
+                        <label class="form-check-label small" for="campo_{{ c }}">{{ c }}</label>
+                    </div>
                 </div>
             </div>
 
@@ -149,6 +272,23 @@
     <p class="mb-0">Carregando usuários...</p>
 </div>
 <div ng-if="$ctrl.error" class="alert alert-danger">{{ $ctrl.error }}</div>
+
+<!-- ===== MODO COLUNA: extração de array plano ===== -->
+<div ng-if="!$ctrl.loading && $ctrl.modo === 'coluna'" class="card mb-4">
+    <div class="card-header bg-info text-dark">
+        <i class="bi bi-list-columns me-1"></i>
+        <strong>coluna</strong> — Array plano: campo <code>{{ $ctrl.filter.coluna }}</code>
+        <span class="badge bg-secondary ms-2">{{ $ctrl.coluna.length }} item(s)</span>
+    </div>
+    <div class="card-body">
+        <div ng-if="$ctrl.coluna.length > 0" class="d-flex flex-wrap gap-2">
+            <span class="badge bg-secondary fs-6" ng-repeat="v in $ctrl.coluna track by $index">{{ v }}</span>
+        </div>
+        <p ng-if="$ctrl.coluna.length === 0" class="text-muted mb-0">
+            <i class="bi bi-inbox me-1"></i>Nenhum resultado.
+        </p>
+    </div>
+</div>
 
 <!-- ===== MODO RESUMO: array_reduce ===== -->
 <div ng-if="!$ctrl.loading && $ctrl.modo === 'resumo'" class="card mb-4">
@@ -225,30 +365,30 @@
         <table class="table table-hover mb-0 align-middle">
             <thead class="table-dark">
                 <tr>
-                    <th style="width: 60px">#</th>
-                    <th>Nome</th>
-                    <th>Email</th>
-                    <th style="width: 110px" class="text-center">Status</th>
-                    <th style="width: 60px" class="text-end">Ações</th>
+                    <th ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('id') !== -1" style="width: 60px">#</th>
+                    <th ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('name') !== -1">Nome</th>
+                    <th ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('email') !== -1">Email</th>
+                    <th ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('is_active') !== -1" style="width: 110px" class="text-center">Status</th>
+                    <th ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('id') !== -1" style="width: 60px" class="text-end">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="u in $ctrl.users | filter:$ctrl.matchFilter"
-                    ng-class="{'table-secondary': !u.is_active}">
-                    <td class="text-muted">{{ u.id }}</td>
-                    <td>
-                        <span ng-class="{'text-muted': !u.is_active}">{{ u.name }}</span>
+                    ng-class="{'table-secondary': u.is_active === false}">
+                    <td ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('id') !== -1" class="text-muted">{{ u.id }}</td>
+                    <td ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('name') !== -1">
+                        <span ng-class="{'text-muted': u.is_active === false}">{{ u.name }}</span>
                     </td>
-                    <td class="small text-muted">{{ u.email }}</td>
-                    <td class="text-center">
+                    <td ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('email') !== -1" class="small text-muted">{{ u.email }}</td>
+                    <td ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('is_active') !== -1" class="text-center">
                         <span ng-if="u.is_active"  class="badge rounded-pill bg-success">
                             <i class="bi bi-check-circle-fill"></i> Ativo
                         </span>
-                        <span ng-if="!u.is_active" class="badge rounded-pill bg-secondary">
+                        <span ng-if="u.is_active === false" class="badge rounded-pill bg-secondary">
                             <i class="bi bi-dash-circle"></i> Inativo
                         </span>
                     </td>
-                    <td class="text-end">
+                    <td ng-if="!$ctrl.filter.campos.length || $ctrl.filter.campos.indexOf('id') !== -1" class="text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-outline-secondary"
                                     data-bs-toggle="dropdown" aria-expanded="false">

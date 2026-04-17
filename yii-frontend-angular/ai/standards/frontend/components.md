@@ -24,32 +24,28 @@ NÃO usar `DOMContentLoaded` global — não funciona com digest cycle do Angula
 
 ---
 
-## Nav-pills verticais para nested states (UI-Router)
+## Nav-tabs horizontais para nested states (UI-Router)
 
-Usar quando uma página pai tem child states (tabs). Substitui `nav-tabs` horizontal.
+Usar quando uma página pai tem child states (≤4 tabs). Padrão para abas acima do conteúdo.
 
 ```html
-<div class="row g-0">
-  <div class="col-md-2 col-12 mb-3 mb-md-0">
-    <div class="nav flex-row flex-md-column nav-pills gap-1 pe-md-3">
-      <a class="nav-link d-flex align-items-center gap-2"
-         ui-sref="estado.filho({id: $ctrl.id})"
-         ui-sref-active="active">
-        <i class="bi bi-icon"></i>
-        <span>Label</span>
-      </a>
-    </div>
-  </div>
-  <div class="col-md-10 col-12">
-    <div ui-view></div>
-  </div>
-</div>
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <a class="nav-link d-flex align-items-center gap-2"
+       ui-sref="estado.filho({id: $ctrl.id})"
+       ui-sref-active="active">
+      <i class="bi bi-icon"></i>
+      Label
+    </a>
+  </li>
+</ul>
+<div ui-view></div>
 ```
 
 **Regras**:
-- `flex-row flex-md-column` — horizontal em mobile, vertical em desktop
 - `ui-sref-active="active"` — adiciona classe `active` via UI-Router (não usar `ng-class` manual)
-- Badges/ícones de status: usar `ms-auto d-none d-md-inline` para não poluir em mobile
+- Badges e ícones de status ficam inline na tab (sem `ms-auto d-none d-md-inline`)
+- NÃO usar `nav-pills flex-column` para nested states com ≤4 tabs
 
 ---
 

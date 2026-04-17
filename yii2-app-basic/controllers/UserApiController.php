@@ -25,7 +25,6 @@ class UserApiController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-        // Cors precisa vir antes de qualquer outro filtro para liberar o preflight OPTIONS.
         $behaviors = array_merge([
             'corsFilter' => [
                 'class' => Cors::class,
@@ -44,13 +43,13 @@ class UserApiController extends Controller
         $behaviors['verbs'] = [
             'class' => VerbFilter::class,
             'actions' => [
-                'index'         => ['GET'],
-                'view'          => ['GET'],
-                'create'        => ['POST'],
-                'update'        => ['PUT', 'PATCH'],
-                'delete'        => ['DELETE'],
+                'index' => ['GET'],
+                'view' => ['GET'],
+                'create' => ['POST'],
+                'update' => ['PUT', 'PATCH'],
+                'delete' => ['DELETE'],
                 'toggle-active' => ['PATCH', 'OPTIONS'],
-                'options'       => ['OPTIONS'],
+                'options' => ['OPTIONS'],
             ],
         ];
         return $behaviors;
@@ -71,35 +70,12 @@ class UserApiController extends Controller
     {
         try {
             $filtros = Yii::$app->request->getQueryParams();
-            $data    = $this->service->findAll($filtros);
+            $data = $this->service->findAll($filtros);
 
             return ['success' => true, 'type' => 'success', 'data' => $data];
         } catch (Throwable $e) {
             Yii::$app->response->statusCode = 400;
             return ['success' => false, 'type' => 'exception', 'message' => $e->getMessage()];
-        }
-    }
-
-    /**
-     * Action espelho de actionIndex usando a versão Active Record do service.
-     * Existe só para benchmark — bata em /user-api e /user-api/v2 com o
-     * Xdebug profiler ligado e compare os dois cachegrinds no PHPStorm.
-     */
-    public function actionIndexV2(): array
-    {
-        try {
-            return [
-                'success' => true,
-                'type'    => 'success',
-                'data'    => $this->service->findAll_v2(),
-            ];
-        } catch (Throwable $e) {
-            Yii::$app->response->statusCode = 400;
-            return [
-                'success' => false,
-                'type'    => 'exception',
-                'message' => $e->getMessage(),
-            ];
         }
     }
 
@@ -156,7 +132,6 @@ class UserApiController extends Controller
         }
     }
 
-
     public function actionUpdate(int $id): array
     {
         try {
@@ -209,14 +184,14 @@ class UserApiController extends Controller
             $result = $this->service->toggleActive($id);
             return [
                 'success' => true,
-                'type'    => 'success',
-                'data'    => $result,
+                'type' => 'success',
+                'data' => $result,
             ];
         } catch (Throwable $e) {
             Yii::$app->response->statusCode = 400;
             return [
                 'success' => false,
-                'type'    => 'exception',
+                'type' => 'exception',
                 'message' => $e->getMessage(),
             ];
         }
