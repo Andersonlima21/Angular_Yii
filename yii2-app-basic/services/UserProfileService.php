@@ -103,9 +103,10 @@ class UserProfileService
                 ->insert(UserProfile::tableName(), $insert)
                 ->execute();
 
+            $id = (int)Yii::$app->db->getLastInsertID();
             $transaction->commit();
 
-            return 'Perfil criado para o usuário de id ' . $body['user_id'] . '!';
+            return ['id' => $id, 'message' => 'Perfil criado para o usuário de id ' . $body['user_id'] . '!'];
 
         } catch (Throwable $e) {
             $transaction->rollBack();

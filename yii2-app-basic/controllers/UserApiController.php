@@ -6,13 +6,8 @@ use app\models\UserApi;
 use app\services\UserService;
 use Throwable;
 use Yii;
-use yii\filters\Cors;
-use yii\filters\VerbFilter;
-use yii\rest\Controller;
-use yii\rest\OptionsAction;
-use yii\web\Response;
 
-class UserApiController extends Controller
+class UserApiController extends BaseRestController
 {
     private UserService $service;
 
@@ -22,48 +17,12 @@ class UserApiController extends Controller
         parent::__construct($id, $module, $config);
     }
 
+    // Adiciona o verbo do toggle-active aos behaviors herdados da base.
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-        $behaviors = array_merge([
-            'corsFilter' => [
-                'class' => Cors::class,
-                'cors' => [
-                    'Origin' => ['*'],
-                    'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-                    'Access-Control-Request-Headers' => ['*'],
-                    'Access-Control-Allow-Credentials' => null,
-                    'Access-Control-Max-Age' => 3600,
-                ],
-            ],
-        ], $behaviors);
-        $behaviors['contentNegotiator']['formats'] = [
-            'application/json' => Response::FORMAT_JSON,
-        ];
-        $behaviors['verbs'] = [
-            'class' => VerbFilter::class,
-            'actions' => [
-                'index' => ['GET'],
-                'view' => ['GET'],
-                'create' => ['POST'],
-                'update' => ['PUT', 'PATCH'],
-                'delete' => ['DELETE'],
-                'toggle-active' => ['PATCH', 'OPTIONS'],
-                'options' => ['OPTIONS'],
-            ],
-        ];
+        $behaviors['verbs']['actions']['toggle-active'] = ['PATCH', 'OPTIONS'];
         return $behaviors;
-    }
-
-    public function actions()
-    {
-        return [
-            'options' => [
-                'class' => OptionsAction::class,
-                'collectionOptions' => ['GET', 'POST', 'OPTIONS'],
-                'resourceOptions' => ['GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            ],
-        ];
     }
 
     public function actionIndex(): array
@@ -84,16 +43,16 @@ class UserApiController extends Controller
         try {
             return [
                 'success' => true,
-                'type' => 'success',
-                'data' => $this->service->findById($id)
-//                'data' => $this->service->findById_new($id)
+                'type'    => 'success',
+                'data'    => $this->service->findById($id),
             ];
         } catch (Throwable $e) {
             Yii::$app->response->statusCode = 400;
             return [
                 'success' => false,
-                'type' => 'exception',
-                'message' => $e->getMessage()];
+                'type'    => 'exception',
+                'message' => $e->getMessage(),
+            ];
         }
     }
 
@@ -119,14 +78,14 @@ class UserApiController extends Controller
             Yii::$app->response->statusCode = 201;
             return [
                 'success' => true,
-                'type' => 'success',
-                'data' => $created,
+                'type'    => 'success',
+                'data'    => $created,
             ];
         } catch (\Throwable $e) {
             Yii::$app->response->statusCode = 400;
             return [
                 'success' => false,
-                'type' => 'exception',
+                'type'    => 'exception',
                 'message' => $e->getMessage(),
             ];
         }
@@ -155,27 +114,17 @@ class UserApiController extends Controller
             Yii::$app->response->statusCode = 200;
             return [
                 'success' => true,
-                'type' => 'success',
-                'data' => $message,
+                'type'    => 'success',
+                'data'    => $message,
             ];
         } catch (\Throwable $e) {
             Yii::$app->response->statusCode = 400;
             return [
                 'success' => false,
-                'type' => 'exception',
+                'type'    => 'exception',
                 'message' => $e->getMessage(),
             ];
         }
-    }
-
-    public function actionUpdate_old(int $id)
-    {
-        $user = $this->service->update($id, Yii::$app->request->getBodyParams());
-        if ($user->hasErrors()) {
-            Yii::$app->response->statusCode = 422;
-            return ['errors' => $user->getErrors()];
-        }
-        return $user;
     }
 
     public function actionToggleActive(int $id): array
@@ -184,14 +133,14 @@ class UserApiController extends Controller
             $result = $this->service->toggleActive($id);
             return [
                 'success' => true,
-                'type' => 'success',
-                'data' => $result,
+                'type'    => 'success',
+                'data'    => $result,
             ];
         } catch (Throwable $e) {
             Yii::$app->response->statusCode = 400;
             return [
                 'success' => false,
-                'type' => 'exception',
+                'type'    => 'exception',
                 'message' => $e->getMessage(),
             ];
         }

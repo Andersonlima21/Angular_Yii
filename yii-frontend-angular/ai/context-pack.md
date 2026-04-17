@@ -110,8 +110,14 @@ Todo novo arquivo JS DEVE ser adicionado manualmente nesta ordem.
 
 | Workaround | Motivo |
 |---|---|
-| Pós-create: `findAll` + filter por email | `POST /user-api` retorna string, sem id do recurso criado |
 | `user-profile-setting`: verifica existência antes de POST vs PUT | Lógica de upsert 1:1 com profile |
+
+> `POST /user-api` agora retorna `{ id, message }` — workaround de `findAll` pós-create foi removido em 2026-04-17.
+
+## Divergência de campo proposital
+
+`GET /user-api/:id` retorna `ativo` (boolean) no objeto raiz; `GET /user-api` (lista) retorna `is_active`.
+Nenhum componente de edição lê `ativo`/`is_active` do contexto atualmente — atenção ao implementar toggle na tela de edição.
 
 ---
 

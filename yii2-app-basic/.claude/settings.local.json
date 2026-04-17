@@ -5,7 +5,10 @@
       "Read(//mnt/c/Users/Listenx/.claude/**)",
       "Read(//c/Users/Listenx/.claude/**)",
       "Read(//c/Users/Listenx/Documents/estudo/Angular_Yii/.claude/**)",
-      "Read(//c/Users/Listenx/Documents/estudo/Angular_Yii/.claude/agents/**)"
+      "Read(//c/Users/Listenx/Documents/estudo/Angular_Yii/.claude/agents/**)",
+      "Bash(cp \"C:/Users/Listenx/Documents/estudo/Angular_Yii/.claude/agents/debugger.md\" \"C:/Users/Listenx/Documents/estudo/Angular_Yii/yii2-app-basic/ai/agents/\")",
+      "Bash(cp \"C:/Users/Listenx/Documents/estudo/Angular_Yii/.claude/agents/performance-engineer.md\" \"C:/Users/Listenx/Documents/estudo/Angular_Yii/yii2-app-basic/ai/agents/\")",
+      "Bash(cp \"C:/Users/Listenx/Documents/estudo/Angular_Yii/.claude/agents/documentation-writer.md\" \"C:/Users/Listenx/Documents/estudo/Angular_Yii/yii2-app-basic/ai/agents/\")"
     ]
   }
 }

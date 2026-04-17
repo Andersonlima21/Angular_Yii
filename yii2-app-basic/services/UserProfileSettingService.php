@@ -96,7 +96,7 @@ class UserProfileSettingService
      *
      * @throws ServerErrorHttpException
      */
-    public function create(array $body): string
+    public function create(array $body): array
     {
         // Formato 2: header + lista de settings.
         if (isset($body['settings']) && is_array($body['settings'])) {
@@ -142,7 +142,7 @@ class UserProfileSettingService
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $now     = new Expression("datetime('now')");
-            $created = 0;
+            $ids     = [];
             $command = Yii::$app->db->createCommand();
 
             foreach ($rows as $row) {
@@ -156,14 +156,14 @@ class UserProfileSettingService
                 ];
 
                 $command->insert(UserProfileSetting::tableName(), $insert)->execute();
-                $created++;
+                $ids[] = (int)Yii::$app->db->getLastInsertID();
             }
 
             $transaction->commit();
 
-            return $created === 1
-                ? 'Setting criado com sucesso.'
-                : "{$created} settings criados com sucesso.";
+            return count($ids) === 1
+                ? ['id' => $ids[0], 'message' => 'Setting criado com sucesso.']
+                : ['ids' => $ids, 'message' => count($ids) . ' settings criados com sucesso.'];
 
         } catch (Throwable $e) {
             $transaction->rollBack();

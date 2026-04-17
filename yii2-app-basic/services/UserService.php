@@ -117,7 +117,7 @@ class UserService
     /**
      * @throws ServerErrorHttpException
      */
-    public function create(array $body): string
+    public function create(array $body): array
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -135,9 +135,10 @@ class UserService
                 ->insert('users', $insert)
                 ->execute();
 
+            $id = (int)Yii::$app->db->getLastInsertID();
             $transaction->commit();
 
-            return 'Usuário ' . $body['name'] . ' cadastrado com sucesso!';
+            return ['id' => $id, 'message' => 'Usuário ' . $body['name'] . ' cadastrado com sucesso!'];
 
         } catch (Throwable $e) {
             $transaction->rollBack();

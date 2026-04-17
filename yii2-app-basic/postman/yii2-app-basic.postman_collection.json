@@ -2,16 +2,23 @@
 	"info": {
 		"_postman_id": "b1a1c001-0001-0001-0001-000000000001",
 		"name": "yii2-app-basic",
-		"description": "Coleção dos endpoints REST do projeto yii2-app-basic.\n\n**Base URL:** http://localhost:8080 (variável `baseUrl`).\n\n**Envelope padrão de resposta:** `{ success: bool, type: string, data | message }`. Em erros 400, `message` traz a string do exception.\n\n**Recursos & cardinalidade:**\n- `user-api` — CRUD de usuários (master).\n- `user-config` — configs key/value por usuário. **1 user → N configs**, com unicidade composta `(user_id, key)`.\n- `user-profile` — dados adicionais do usuário. **1 user → 1 profile** (`user_id` é unique).\n- `user-profile-setting` — preferências do profile. **1 profile → N settings** + campo `url`. POST aceita objeto único, `{ user_profile_id, settings: [...] }` ou array top-level.\n\n**FK em cascata:** deletar um user remove suas configs e profile; deletar um profile remove todos os settings.\n\n**Validação de unicidade composta em configs:** a mesma `key` pode existir para usuários diferentes — só é bloqueada quando já existe a combinação `(user_id, key)`.",
+		"description": "Coleção dos endpoints REST do projeto yii2-app-basic.\n\n**Base URL:** `{{baseUrl}}` (http://localhost:8080).\n\n**Envelope padrão:** `{ success, type, data | message }`.\n\n**Variáveis automáticas:** ao criar qualquer recurso, o script de teste captura o `id` retornado e salva em `userId`, `configId`, `profileId` ou `settingId`. As demais requests já usam essas variáveis nos paths.\n\n**Recursos:**\n- `user-api` — CRUD de usuários + toggle de status.\n- `user-config` — pares key/value por usuário.\n- `user-profile` — dados adicionais do usuário.\n- `user-profile-setting` — settings do profile.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
+	"variable": [
+		{ "key": "baseUrl",   "value": "http://localhost:8080", "type": "string" },
+		{ "key": "userId",    "value": "", "type": "string" },
+		{ "key": "configId",  "value": "", "type": "string" },
+		{ "key": "profileId", "value": "", "type": "string" },
+		{ "key": "settingId", "value": "", "type": "string" }
+	],
 	"item": [
 		{
 			"name": "user-api",
-			"description": "CRUD do recurso master `users`. `GET /user-api/:id` retorna o user com `configs[]` e `profiles[]` aninhados (o profile, se existir, vem como único item da array — relação 1:1).",
+			"description": "CRUD do recurso master `users`. GET /:id retorna o user com `configs[]` e `profiles[]` aninhados.",
 			"item": [
 				{
-					"name": "Index - GET /user-api",
+					"name": "Index — GET /user-api",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -20,89 +27,147 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["user-api"]
 						},
-						"description": "Lista todos os usuários (com inner join na primeira config — comportamento legado do findAll)."
+						"description": "Lista todos os usuários sem filtro."
 					}
 				},
 				{
-					"name": "View - GET /user-api/:id",
+					"name": "Index com filtros — GET /user-api",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/user-api/:id",
+							"raw": "{{baseUrl}}/user-api?status=ativo&ordenar_por=name&direcao=asc&limite=10",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-api", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1", "description": "ID do usuário" }
+							"path": ["user-api"],
+							"query": [
+								{ "key": "status",      "value": "ativo",    "description": "ativo | inativo" },
+								{ "key": "ordenar_por", "value": "name",     "description": "id | name | email | created_at | updated_at" },
+								{ "key": "direcao",     "value": "asc",      "description": "asc | desc" },
+								{ "key": "limite",      "value": "10",       "description": "Teto de resultados (array_splice)" },
+								{ "key": "busca",       "value": "",         "description": "Busca textual em name e email (stripos)", "disabled": true },
+								{ "key": "campos[]",    "value": "id",       "description": "Projeção: retorna só os campos listados", "disabled": true },
+								{ "key": "campos[]",    "value": "name",     "description": "", "disabled": true },
+								{ "key": "coluna",      "value": "email",    "description": "Extrai coluna como array plano (array_column)", "disabled": true },
+								{ "key": "ordenacao",   "value": "az",       "description": "az | za — ordena só por name", "disabled": true },
+								{ "key": "inverter",    "value": "1",        "description": "Inverte a lista (array_reverse)", "disabled": true },
+								{ "key": "sem_dominio", "value": "1",        "description": "Remove domínio do email (array_map + strstr)", "disabled": true },
+								{ "key": "resumo",      "value": "1",        "description": "Retorna contagem de ativos/inativos (array_reduce)", "disabled": true },
+								{ "key": "chunk",       "value": "3",        "description": "Divide em grupos de N (array_chunk)", "disabled": true },
+								{ "key": "pagina",      "value": "1",        "description": "Paginação (array_slice) — use com por_pagina", "disabled": true },
+								{ "key": "por_pagina",  "value": "3",        "description": "Itens por página (padrão 3)", "disabled": true }
 							]
 						},
-						"description": "Retorna o user com `configs[]` (todas) e `profiles[]` (no máximo 1 — relação 1:1)."
+						"description": "Todos os filtros disponíveis. Habilite/desabilite os query params conforme necessário."
 					}
 				},
 				{
-					"name": "Create - POST /user-api",
+					"name": "Index V2 (ActiveRecord) — GET /user-api/v2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-api/v2",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-api", "v2"]
+						},
+						"description": "Mesma listagem via ActiveRecord. Benchmark comparativo com o Index padrão (Query Builder)."
+					}
+				},
+				{
+					"name": "View — GET /user-api/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-api/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-api", "{{userId}}"]
+						},
+						"description": "Retorna o user com configs[] e profiles[] aninhados."
+					}
+				},
+				{
+					"name": "Create — POST /user-api",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.success && res.data && res.data.id) {",
+									"    pm.collectionVariables.set('userId', res.data.id);",
+									"    console.log('userId capturado:', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Anderson\",\n    \"email\": \"anderson@example.com\",\n    \"is_active\": true\n}"
+							"raw": "{\n    \"name\": \"Anderson Lima\",\n    \"email\": \"anderson@example.com\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/user-api",
 							"host": ["{{baseUrl}}"],
 							"path": ["user-api"]
 						},
-						"description": "Cria um user. Retorna apenas uma string de sucesso — o id não vem na resposta (consultar via Index e localizar pelo email único)."
+						"description": "Cria o user e captura automaticamente o `id` em `{{userId}}`."
 					}
 				},
 				{
-					"name": "Update - PUT /user-api/:id",
+					"name": "Update — PUT /user-api/:id",
 					"request": {
 						"method": "PUT",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Anderson Atualizado\",\n    \"email\": \"anderson.novo@example.com\",\n    \"is_active\": false\n}"
+							"raw": "{\n    \"name\": \"Anderson Lima Atualizado\",\n    \"email\": \"anderson.novo@example.com\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user-api/:id",
+							"raw": "{{baseUrl}}/user-api/{{userId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-api", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
+							"path": ["user-api", "{{userId}}"]
 						}
 					}
 				},
 				{
-					"name": "Delete - DELETE /user-api/:id",
+					"name": "Toggle Active — PATCH /user-api/:id/toggle-active",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-api/{{userId}}/toggle-active",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-api", "{{userId}}", "toggle-active"]
+						},
+						"description": "Alterna is_active entre true e false. Retorna `{ id, is_active, message }`."
+					}
+				},
+				{
+					"name": "Delete — DELETE /user-api/:id",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/user-api/:id",
+							"raw": "{{baseUrl}}/user-api/{{userId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-api", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
+							"path": ["user-api", "{{userId}}"]
 						},
-						"description": "204 No Content. Configs e profile do user são removidos em cascata pela FK."
+						"description": "204 No Content. Remove o user e suas configs/profiles em cascata."
 					}
 				}
 			]
 		},
 		{
 			"name": "user-config",
-			"description": "Configs key/value de um usuário. Unicidade composta `(user_id, key)`: a mesma key pode existir para outros usuários, mas não duplicada para o mesmo user.",
+			"description": "Configs key/value por usuário. Unicidade composta (user_id + key).",
 			"item": [
 				{
-					"name": "Index - GET /user-config",
+					"name": "Index — GET /user-config",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -110,78 +175,78 @@
 							"raw": "{{baseUrl}}/user-config",
 							"host": ["{{baseUrl}}"],
 							"path": ["user-config"]
-						},
-						"description": "Lista todas as configs de todos os users."
-					}
-				},
-				{
-					"name": "View - GET /user-config/:id",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/user-config/:id",
-							"host": ["{{baseUrl}}"],
-							"path": ["user-config", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
 						}
 					}
 				},
 				{
-					"name": "Create - POST /user-config",
+					"name": "View — GET /user-config/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-config/{{configId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-config", "{{configId}}"]
+						}
+					}
+				},
+				{
+					"name": "Create — POST /user-config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.success && res.data && res.data.id) {",
+									"    pm.collectionVariables.set('configId', res.data.id);",
+									"    console.log('configId capturado:', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"user_id\": 1,\n    \"key\": \"theme\",\n    \"value\": \"dark\"\n}"
+							"raw": "{\n    \"user_id\": {{userId}},\n    \"key\": \"theme\",\n    \"value\": \"dark\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/user-config",
 							"host": ["{{baseUrl}}"],
 							"path": ["user-config"]
 						},
-						"description": "201. Rejeita (400) se já existir a combinação `(user_id, key)`. `value` é opcional."
+						"description": "Cria a config e captura automaticamente o `id` em `{{configId}}`."
 					}
 				},
 				{
-					"name": "Update - PUT /user-config/:id",
+					"name": "Update — PUT /user-config/:id",
 					"request": {
 						"method": "PUT",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"key\": \"theme\",\n    \"value\": \"light\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user-config/:id",
+							"raw": "{{baseUrl}}/user-config/{{configId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-config", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
-						},
-						"description": "Atualização parcial (campos omitidos preservam valor). Mudar `key` para uma já existente naquele user é rejeitado (validação unique composta ignora o próprio registro)."
+							"path": ["user-config", "{{configId}}"]
+						}
 					}
 				},
 				{
-					"name": "Delete - DELETE /user-config/:id",
+					"name": "Delete — DELETE /user-config/:id",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/user-config/:id",
+							"raw": "{{baseUrl}}/user-config/{{configId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-config", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
+							"path": ["user-config", "{{configId}}"]
 						},
 						"description": "204 No Content."
 					}
@@ -190,10 +255,10 @@
 		},
 		{
 			"name": "user-profile",
-			"description": "Dados adicionais (telefone, bio, avatar). Relação **1:1** com user — `user_id` é unique. Tentar criar um segundo profile para o mesmo user é rejeitado.",
+			"description": "Dados adicionais do usuário. Relação 1:1 com user (user_id único).",
 			"item": [
 				{
-					"name": "Index - GET /user-profile",
+					"name": "Index — GET /user-profile",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -205,85 +270,86 @@
 					}
 				},
 				{
-					"name": "View - GET /user-profile/:id",
+					"name": "View — GET /user-profile/:id",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/user-profile/:id",
+							"raw": "{{baseUrl}}/user-profile/{{profileId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-profile", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
+							"path": ["user-profile", "{{profileId}}"]
 						}
 					}
 				},
 				{
-					"name": "Create - POST /user-profile",
+					"name": "Create — POST /user-profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.success && res.data && res.data.id) {",
+									"    pm.collectionVariables.set('profileId', res.data.id);",
+									"    console.log('profileId capturado:', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"user_id\": 1,\n    \"phone\": \"+55 11 99999-0000\",\n    \"birth_date\": \"1995-08-21\",\n    \"bio\": \"Desenvolvedor PHP estudando Yii2.\",\n    \"avatar_url\": \"https://exemplo.com/avatar.png\"\n}"
+							"raw": "{\n    \"user_id\": {{userId}},\n    \"phone\": \"11999990000\",\n    \"birth_date\": \"1995-08-21\",\n    \"bio\": \"Desenvolvedor PHP estudando Yii2.\",\n    \"avatar_url\": \"https://exemplo.com/avatar.png\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/user-profile",
 							"host": ["{{baseUrl}}"],
 							"path": ["user-profile"]
 						},
-						"description": "201. `birth_date` no formato `YYYY-MM-DD`. Rejeita (400) se o user já tem profile (unique)."
+						"description": "Cria o profile e captura automaticamente o `id` em `{{profileId}}`."
 					}
 				},
 				{
-					"name": "Update - PUT /user-profile/:id",
+					"name": "Update — PUT /user-profile/:id",
 					"request": {
 						"method": "PUT",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"phone\": \"+55 11 98888-7777\",\n    \"birth_date\": \"1995-08-21\",\n    \"bio\": \"Bio atualizada.\",\n    \"avatar_url\": \"https://exemplo.com/novo.png\"\n}"
+							"raw": "{\n    \"phone\": \"11988887777\",\n    \"birth_date\": \"1995-08-21\",\n    \"bio\": \"Bio atualizada.\",\n    \"avatar_url\": \"https://exemplo.com/novo.png\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user-profile/:id",
+							"raw": "{{baseUrl}}/user-profile/{{profileId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-profile", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
-						},
-						"description": "Atualização parcial. `user_id` não é atualizável."
+							"path": ["user-profile", "{{profileId}}"]
+						}
 					}
 				},
 				{
-					"name": "Delete - DELETE /user-profile/:id",
+					"name": "Delete — DELETE /user-profile/:id",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/user-profile/:id",
+							"raw": "{{baseUrl}}/user-profile/{{profileId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-profile", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
+							"path": ["user-profile", "{{profileId}}"]
 						},
-						"description": "204 No Content. O setting do profile é removido em cascata."
+						"description": "204 No Content. Remove o profile e seus settings em cascata."
 					}
 				}
 			]
 		},
 		{
 			"name": "user-profile-setting",
-			"description": "Preferências do profile (theme, language, timezone, notificações, url). Relação **1:N** com profile — um profile pode ter vários settings. POST aceita 3 formatos: objeto único, `{ user_profile_id, settings: [...] }` ou array top-level (todos atomicamente em uma transação).",
+			"description": "Settings do profile. POST aceita objeto único, { user_profile_id, settings: [...] } ou array top-level.",
 			"item": [
 				{
-					"name": "Index - GET /user-profile-setting",
+					"name": "Index — GET /user-profile-setting",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -291,128 +357,117 @@
 							"raw": "{{baseUrl}}/user-profile-setting",
 							"host": ["{{baseUrl}}"],
 							"path": ["user-profile-setting"]
-						},
-						"description": "Lista todos os settings. Retorna 400 se a tabela estiver vazia (padrão do projeto)."
-					}
-				},
-				{
-					"name": "View - GET /user-profile-setting/:id",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/user-profile-setting/:id",
-							"host": ["{{baseUrl}}"],
-							"path": ["user-profile-setting", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
 						}
 					}
 				},
 				{
-					"name": "Create single - POST /user-profile-setting",
+					"name": "View — GET /user-profile-setting/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user-profile-setting/{{settingId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["user-profile-setting", "{{settingId}}"]
+						}
+					}
+				},
+				{
+					"name": "Create single — POST /user-profile-setting",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.success && res.data && res.data.id) {",
+									"    pm.collectionVariables.set('settingId', res.data.id);",
+									"    console.log('settingId capturado:', res.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"user_profile_id\": 1,\n    \"theme\": \"dark\",\n    \"language\": \"pt-BR\",\n    \"timezone\": \"America/Sao_Paulo\",\n    \"notifications_enabled\": true,\n    \"url\": \"https://exemplo.com/dashboard\"\n}"
+							"raw": "{\n    \"user_profile_id\": {{profileId}},\n    \"platform\": \"web\",\n    \"stack\": \"PHP/Yii2\",\n    \"certificate_url\": \"https://exemplo.com/cert.pdf\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/user-profile-setting",
 							"host": ["{{baseUrl}}"],
 							"path": ["user-profile-setting"]
 						},
-						"description": "201. `theme` aceita `light|dark`. Campos opcionais usam defaults (light, pt-BR, America/Sao_Paulo, true, null)."
+						"description": "Cria o setting e captura automaticamente o `id` em `{{settingId}}`."
 					}
 				},
 				{
-					"name": "Create bulk (header + settings) - POST /user-profile-setting",
+					"name": "Create bulk (header + settings) — POST /user-profile-setting",
 					"request": {
 						"method": "POST",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"user_profile_id\": 1,\n    \"settings\": [\n        {\n            \"theme\": \"dark\",\n            \"language\": \"pt-BR\",\n            \"timezone\": \"America/Sao_Paulo\",\n            \"notifications_enabled\": true,\n            \"url\": \"https://exemplo.com/dashboard\"\n        },\n        {\n            \"theme\": \"light\",\n            \"language\": \"en\",\n            \"timezone\": \"UTC\",\n            \"notifications_enabled\": false,\n            \"url\": \"https://exemplo.com/admin\"\n        },\n        {\n            \"theme\": \"dark\"\n        }\n    ]\n}"
+							"raw": "{\n    \"user_profile_id\": {{profileId}},\n    \"settings\": [\n        { \"platform\": \"web\",    \"stack\": \"PHP/Yii2\" },\n        { \"platform\": \"mobile\", \"stack\": \"React Native\" }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/user-profile-setting",
 							"host": ["{{baseUrl}}"],
 							"path": ["user-profile-setting"]
 						},
-						"description": "201. **Formato preferido para criação em massa no mesmo profile.** O `user_profile_id` é informado uma única vez no topo e aplicado a todos os itens de `settings[]` que não tragam o seu próprio. Se um item declarar `user_profile_id`, ele tem precedência sobre o do topo. Tudo na mesma transação — se um item falhar, nada é gravado e a mensagem aponta `[item #N]`."
+						"description": "Bulk no mesmo profile. `user_profile_id` informado uma vez no topo. Retorna `{ ids: [...], message }`."
 					}
 				},
 				{
-					"name": "Create bulk (array top-level) - POST /user-profile-setting",
+					"name": "Create bulk (array top-level) — POST /user-profile-setting",
 					"request": {
 						"method": "POST",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "[\n    {\n        \"user_profile_id\": 1,\n        \"theme\": \"dark\",\n        \"url\": \"https://exemplo.com/a\"\n    },\n    {\n        \"user_profile_id\": 2,\n        \"theme\": \"light\",\n        \"url\": \"https://exemplo.com/b\"\n    }\n]"
+							"raw": "[\n    { \"user_profile_id\": {{profileId}}, \"platform\": \"web\",    \"stack\": \"PHP/Yii2\" },\n    { \"user_profile_id\": {{profileId}}, \"platform\": \"mobile\", \"stack\": \"Flutter\" }\n]"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/user-profile-setting",
 							"host": ["{{baseUrl}}"],
 							"path": ["user-profile-setting"]
 						},
-						"description": "Formato alternativo quando os settings em massa são para profiles **diferentes** — cada item carrega o seu próprio `user_profile_id`. Mesma garantia transacional."
+						"description": "Bulk para profiles diferentes — cada item carrega seu próprio `user_profile_id`."
 					}
 				},
 				{
-					"name": "Update - PUT /user-profile-setting/:id",
+					"name": "Update — PUT /user-profile-setting/:id",
 					"request": {
 						"method": "PUT",
-						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
-						],
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"theme\": \"light\",\n    \"language\": \"en\",\n    \"timezone\": \"UTC\",\n    \"notifications_enabled\": false,\n    \"url\": \"https://exemplo.com/novo\"\n}"
+							"raw": "{\n    \"platform\": \"desktop\",\n    \"stack\": \"PHP/Yii2 + SQLite\",\n    \"certificate_url\": \"https://exemplo.com/cert-atualizado.pdf\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user-profile-setting/:id",
+							"raw": "{{baseUrl}}/user-profile-setting/{{settingId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-profile-setting", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
-						},
-						"description": "Atualização parcial. `user_profile_id` não é atualizável."
+							"path": ["user-profile-setting", "{{settingId}}"]
+						}
 					}
 				},
 				{
-					"name": "Delete - DELETE /user-profile-setting/:id",
+					"name": "Delete — DELETE /user-profile-setting/:id",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/user-profile-setting/:id",
+							"raw": "{{baseUrl}}/user-profile-setting/{{settingId}}",
 							"host": ["{{baseUrl}}"],
-							"path": ["user-profile-setting", ":id"],
-							"variable": [
-								{ "key": "id", "value": "1" }
-							]
+							"path": ["user-profile-setting", "{{settingId}}"]
 						},
 						"description": "204 No Content."
 					}
 				}
 			]
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:8080",
-			"type": "string"
 		}
 	]
 }

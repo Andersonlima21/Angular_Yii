@@ -93,7 +93,7 @@ class UserConfigService
     /**
      * @throws ServerErrorHttpException
      */
-    public function create(array $body): string
+    public function create(array $body): array
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -129,9 +129,10 @@ class UserConfigService
                 ->insert(UserConfig::tableName(), $insert)
                 ->execute();
 
+            $id = (int)Yii::$app->db->getLastInsertID();
             $transaction->commit();
 
-            return 'Config para o user id ' . $body['user_id'] . ' criado com sucesso';
+            return ['id' => $id, 'message' => 'Config para o user id ' . $body['user_id'] . ' criado com sucesso'];
 
         } catch (Throwable $e) {
             $transaction->rollBack();

@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Read(//c/Users/Listenx/Documents/estudo/yii2-app-basic/controllers/**)",
-      "Read(//c/Users/Listenx/Documents/estudo/**)"
+      "Read(//c/Users/Listenx/Documents/estudo/**)",
+      "Bash(node --check \"c:/Users/Listenx/Documents/estudo/Angular_Yii/yii-frontend-angular/app/directives/bsTooltip.js\")",
+      "Bash(node --check app/**/*.js)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }
