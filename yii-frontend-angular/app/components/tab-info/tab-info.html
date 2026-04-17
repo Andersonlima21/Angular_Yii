@@ -10,16 +10,23 @@
         <input type="email" class="form-control" ng-model="$ctrl.form.email" required maxlength="255">
     </div>
 
-    <div class="row text-muted small mb-3">
-        <div class="col-md-6">Criado: {{ $ctrl.user.created_at | sqlDate }}</div>
-        <div class="col-md-6">Atualizado: {{ $ctrl.user.updated_at | sqlDate }}</div>
-    </div>
-
     <div class="text-end">
         <button type="submit" class="btn btn-primary" ng-disabled="$ctrl.saving">
             <i class="bi bi-save"></i>
             <span ng-if="!$ctrl.saving">Salvar</span>
-            <span ng-if="$ctrl.saving">Salvando...</span>
+            <span ng-if="$ctrl.saving">
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>Salvando...
+            </span>
         </button>
     </div>
 </form>
+
+<!-- Auditoria — separada do form de edição -->
+<div class="card mt-3 border-0 bg-light">
+    <div class="card-body py-2">
+        <small class="text-muted d-flex gap-4 flex-wrap">
+            <span><i class="bi bi-calendar-plus me-1"></i>Criado: {{ $ctrl.user.created_at | sqlDate }}</span>
+            <span><i class="bi bi-calendar-check me-1"></i>Atualizado: {{ $ctrl.user.updated_at | sqlDate }}</span>
+        </small>
+    </div>
+</div>

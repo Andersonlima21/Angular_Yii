@@ -23,16 +23,14 @@
         </div>
 
         <hr class="my-2">
-        <p class="small text-muted mb-2 fw-semibold">
-            <i class="bi bi-braces me-1"></i>Filtros via funções de array PHP (aplicados no backend)
-        </p>
 
         <div class="row g-3">
 
-            <!-- array_filter: status -->
+            <!-- Status -->
             <div class="col-md-3">
-                <label class="form-label small">
-                    <span class="badge bg-primary me-1">array_filter</span>Status
+                <label class="form-label small"
+                       bs-tooltip="array_filter — filtra registros por status no backend">
+                    Status
                 </label>
                 <select class="form-select form-select-sm"
                         ng-model="$ctrl.filter.status"
@@ -44,10 +42,11 @@
                 </select>
             </div>
 
-            <!-- usort: ordenação -->
+            <!-- Ordenação -->
             <div class="col-md-3">
-                <label class="form-label small">
-                    <span class="badge bg-primary me-1">usort</span>Ordenação
+                <label class="form-label small"
+                       bs-tooltip="usort — ordena registros por critério no backend">
+                    Ordenação
                 </label>
                 <select class="form-select form-select-sm"
                         ng-model="$ctrl.filter.ordenacao"
@@ -59,41 +58,44 @@
                 </select>
             </div>
 
-            <!-- array_reverse -->
+            <!-- Inverter ordem -->
             <div class="col-md-3 d-flex align-items-end">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="chkInverter"
                            ng-model="$ctrl.filter.inverter"
                            ng-change="$ctrl.aplicarFiltros()"
                            ng-disabled="$ctrl.filter.resumo">
-                    <label class="form-check-label small" for="chkInverter">
-                        <span class="badge bg-secondary me-1">array_reverse</span>Inverter ordem
+                    <label class="form-check-label small" for="chkInverter"
+                           bs-tooltip="array_reverse — inverte a ordem dos resultados">
+                        Inverter ordem
                     </label>
                 </div>
             </div>
 
-            <!-- array_map: sem domínio -->
+            <!-- Ocultar domínio -->
             <div class="col-md-3 d-flex align-items-end">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="chkSemDominio"
                            ng-model="$ctrl.filter.semDominio"
                            ng-change="$ctrl.aplicarFiltros()"
                            ng-disabled="$ctrl.filter.resumo">
-                    <label class="form-check-label small" for="chkSemDominio">
-                        <span class="badge bg-secondary me-1">array_map</span>Ocultar domínio do e-mail
+                    <label class="form-check-label small" for="chkSemDominio"
+                           bs-tooltip="array_map — transforma o e-mail ocultando o domínio">
+                        Ocultar domínio do e-mail
                     </label>
                 </div>
             </div>
 
-            <!-- array_slice: paginação -->
+            <!-- Paginar -->
             <div class="col-md-4">
                 <div class="form-check mb-1">
                     <input class="form-check-input" type="checkbox" id="chkPagina"
                            ng-model="$ctrl.filter.pagina"
                            ng-change="$ctrl.aplicarFiltros()"
                            ng-disabled="$ctrl.filter.resumo || $ctrl.filter.chunk">
-                    <label class="form-check-label small" for="chkPagina">
-                        <span class="badge bg-info text-dark me-1">array_slice</span>Paginar
+                    <label class="form-check-label small" for="chkPagina"
+                           bs-tooltip="array_slice — divide os resultados em páginas">
+                        Paginar
                     </label>
                 </div>
                 <div class="input-group input-group-sm" ng-if="$ctrl.filter.pagina">
@@ -104,10 +106,11 @@
                 </div>
             </div>
 
-            <!-- array_chunk -->
+            <!-- Agrupar -->
             <div class="col-md-4">
-                <label class="form-label small">
-                    <span class="badge bg-info text-dark me-1">array_chunk</span>Agrupar em lotes de
+                <label class="form-label small"
+                       bs-tooltip="array_chunk — agrupa os registros em lotes de N itens">
+                    Agrupar em lotes de
                 </label>
                 <div class="input-group input-group-sm">
                     <input type="number" class="form-control" min="1" max="10" placeholder="N usuários"
@@ -122,14 +125,15 @@
                 </div>
             </div>
 
-            <!-- array_reduce: resumo -->
+            <!-- Resumo -->
             <div class="col-md-4 d-flex align-items-end">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="chkResumo"
                            ng-model="$ctrl.filter.resumo"
                            ng-change="$ctrl.aplicarFiltros()">
-                    <label class="form-check-label small" for="chkResumo">
-                        <span class="badge bg-warning text-dark me-1">array_reduce</span>Mostrar resumo ativos/inativos
+                    <label class="form-check-label small" for="chkResumo"
+                           bs-tooltip="array_reduce — agrupa e conta ativos/inativos">
+                        Mostrar resumo ativos/inativos
                     </label>
                 </div>
             </div>
@@ -138,8 +142,13 @@
     </div>
 </div>
 
-<div ng-if="$ctrl.loading" class="alert alert-info">Carregando...</div>
-<div ng-if="$ctrl.error"   class="alert alert-danger">{{ $ctrl.error }}</div>
+<div ng-if="$ctrl.loading" class="text-center py-5 text-muted">
+    <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mb-0">Carregando usuários...</p>
+</div>
+<div ng-if="$ctrl.error" class="alert alert-danger">{{ $ctrl.error }}</div>
 
 <!-- ===== MODO RESUMO: array_reduce ===== -->
 <div ng-if="!$ctrl.loading && $ctrl.modo === 'resumo'" class="card mb-4">
@@ -220,7 +229,7 @@
                     <th>Nome</th>
                     <th>Email</th>
                     <th style="width: 110px" class="text-center">Status</th>
-                    <th style="width: 200px" class="text-end">Ações</th>
+                    <th style="width: 60px" class="text-end">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -240,23 +249,43 @@
                         </span>
                     </td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-outline-primary" ng-click="$ctrl.edit(u.id)">
-                            <i class="bi bi-pencil"></i> Editar
-                        </button>
-                        <button class="btn btn-sm"
-                                ng-class="u.is_active ? 'btn-outline-warning' : 'btn-outline-success'"
-                                ng-click="$ctrl.toggleActive(u)"
-                                title="{{ u.is_active ? 'Inativar' : 'Ativar' }}">
-                            <i class="bi" ng-class="u.is_active ? 'bi-slash-circle' : 'bi-check-circle'"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" ng-click="$ctrl.remove(u)">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li>
+                                    <button class="dropdown-item" ng-click="$ctrl.edit(u.id)">
+                                        <i class="bi bi-pencil me-2 text-primary"></i>Editar
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" ng-click="$ctrl.toggleActive(u)">
+                                        <i class="bi me-2"
+                                           ng-class="u.is_active ? 'bi-slash-circle text-warning' : 'bi-check-circle text-success'"></i>
+                                        {{ u.is_active ? 'Inativar' : 'Ativar' }}
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button class="dropdown-item text-danger" ng-click="$ctrl.remove(u)">
+                                        <i class="bi bi-trash me-2"></i>Excluir
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
                 <tr ng-if="($ctrl.users | filter:$ctrl.matchFilter).length === 0">
-                    <td colspan="5" class="text-center text-muted py-4">
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="bi bi-people display-6 d-block mb-2 opacity-50"></i>
                         Nenhum usuário encontrado.
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary" ng-click="$ctrl.create()">
+                                <i class="bi bi-plus-lg"></i> Criar o primeiro usuário
+                            </button>
+                        </div>
                     </td>
                 </tr>
             </tbody>

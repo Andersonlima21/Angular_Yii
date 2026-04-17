@@ -1,0 +1,93 @@
+/* =====================
+   Layout — Sidebar + Content
+   ===================== */
+.app-sidebar {
+  width: 240px;
+  min-height: 100vh;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.app-sidebar .nav-link {
+  color: rgba(255, 255, 255, .7);
+  border-radius: 6px;
+  padding: .5rem .875rem;
+  transition: background-color .15s, color .15s;
+  font-size: .925rem;
+}
+
+.app-sidebar .nav-link:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, .12);
+}
+
+.app-sidebar .nav-link.active {
+  color: #fff;
+  background-color: rgba(255, 255, 255, .2);
+  font-weight: 500;
+}
+
+.app-sidebar .nav-link .bi {
+  width: 18px;
+  display: inline-block;
+  text-align: center;
+}
+
+.app-content {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 2rem;
+  background: #f7f8fa;
+  min-height: 100vh;
+}
+
+/* =====================
+   Mobile header
+   ===================== */
+.app-mobile-header {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .app-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .5rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+  }
+
+  .app-content {
+    padding: 1rem;
+  }
+}
+
+/* =====================
+   Nav — geral
+   ===================== */
+.nav-tabs .nav-link {
+  cursor: pointer;
+}
+
+/* =====================
+   Pills verticais (user-edit — Tarefa 5)
+   ===================== */
+.nav-pills .nav-link {
+  color: #495057;
+  font-size: .9rem;
+  cursor: pointer;
+}
+
+.nav-pills .nav-link:hover {
+  background-color: #e9ecef;
+}
+
+.nav-pills .nav-link.active {
+  background-color: var(--bs-primary);
+  color: #fff;
+}

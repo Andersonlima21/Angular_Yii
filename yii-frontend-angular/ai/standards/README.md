@@ -14,10 +14,10 @@ Padrões estáveis organizados por camada. Carregar **1 por sessão** sob demand
 
 | Arquivo | Conteúdo |
 |---|---|
-| `components.md` | Catálogo de componentes: o que existe e quando usar |
-| `styling.md` | Bootstrap 5.3.3, classes usadas, padrões visuais |
-| `routing.md` | UI-Router: estados, resolves, nested states |
-| `conventions.md` | Naming, ordenação de código, boas práticas JS |
+| `components.md` | ✅ Padrões de UI: bs-tooltip, nav-pills, spinner, breadcrumb, empty state, dropdown de ações |
+| `styling.md` | ✅ Layout sidebar (app-sidebar/app-content), mobile offcanvas, app.css |
+| `routing.md` | UI-Router: estados, resolves, nested states (a criar) |
+| `conventions.md` | Naming, ordenação de código, boas práticas JS (a criar) |
 
 ## `/api/`
 

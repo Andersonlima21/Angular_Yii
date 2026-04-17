@@ -10,7 +10,7 @@
 |---|---|---|
 | Frontend framework | AngularJS | 1.8.3 |
 | Roteamento | UI-Router | 1.0.30 |
-| CSS | Bootstrap | 5.3.3 |
+| CSS + JS | Bootstrap | 5.3.3 (CSS + bundle JS via CDN) |
 | Backend | Yii2 REST | — |
 | DB (dev) | SQLite | — |
 | Entrega de libs | CDN-only | sem npm/bundler |
@@ -54,8 +54,10 @@ app/
 │   ├── user-edit/
 │   └── user-list/
 ├── controllers/            # controllers legados (não componentizados)
+├── app.css                 # estilos customizados (sidebar, layout, nav-pills)
 ├── directives/
-│   └── phoneMask.js        # máscara (XX) XXXXX-XXXX, valida 11 dígitos
+│   ├── phoneMask.js        # máscara (XX) XXXXX-XXXX, valida 11 dígitos
+│   └── bsTooltip.js        # inicializa Bootstrap Tooltip em elementos dinâmicos do AngularJS
 ├── filters/
 │   └── sqlDate.js          # YYYY-MM-DD HH:MM:SS → dd/MM/yyyy HH:mm
 ├── services/
@@ -89,11 +91,16 @@ editUser                     → pai (resolve: userService.findById → userData
 
 ## Ordem de scripts em index.html
 
-1. CDN (AngularJS, UI-Router, Bootstrap)
+1. CDN — nesta sub-ordem obrigatória:
+   1. `bootstrap.bundle.min.js` ← **ANTES do AngularJS** (diretivas que usam `bootstrap.*` dependem disso)
+   2. `angular.min.js`
+   3. `angular-ui-router.min.js`
 2. `app/app.js`
-3. Filters
-4. Services
-5. Controllers / Components
+3. Filters (`app/filters/`)
+4. Directives (`app/directives/`)
+5. Services (`app/services/`)
+6. Shared components (`app/shared/`)
+7. Components (`app/components/`)
 
 Todo novo arquivo JS DEVE ser adicionado manualmente nesta ordem.
 
