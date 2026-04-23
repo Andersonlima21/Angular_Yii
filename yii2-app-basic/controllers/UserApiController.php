@@ -6,6 +6,8 @@ use app\models\UserApi;
 use app\services\UserService;
 use Throwable;
 use Yii;
+use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
 
 class UserApiController extends BaseRestController
 {
@@ -32,8 +34,12 @@ class UserApiController extends BaseRestController
             $data = $this->service->findAll($filtros);
 
             return ['success' => true, 'type' => 'success', 'data' => $data];
+        } catch (HttpException $e) {
+            // Usa o statusCode da própria exception (404, 500, etc.) em vez de forçar 400.
+            Yii::$app->response->statusCode = $e->statusCode;
+            return ['success' => false, 'type' => 'exception', 'message' => $e->getMessage()];
         } catch (Throwable $e) {
-            Yii::$app->response->statusCode = 400;
+            Yii::$app->response->statusCode = 500;
             return ['success' => false, 'type' => 'exception', 'message' => $e->getMessage()];
         }
     }
@@ -43,14 +49,21 @@ class UserApiController extends BaseRestController
         try {
             return [
                 'success' => true,
-                'type'    => 'success',
-                'data'    => $this->service->findById($id),
+                'type' => 'success',
+                'data' => $this->service->findById($id),
             ];
-        } catch (Throwable $e) {
-            Yii::$app->response->statusCode = 400;
+        } catch (HttpException $e) {
+            Yii::$app->response->statusCode = $e->statusCode;
             return [
                 'success' => false,
-                'type'    => 'exception',
+                'type' => 'exception',
+                'message' => $e->getMessage(),
+            ];
+        } catch (Throwable $e) {
+            Yii::$app->response->statusCode = 500;
+            return [
+                'success' => false,
+                'type' => 'exception',
                 'message' => $e->getMessage(),
             ];
         }
@@ -70,7 +83,8 @@ class UserApiController extends BaseRestController
                 foreach ($user->getFirstErrors() as $field => $msg) {
                     $errors[] = "{$field}: {$msg}";
                 }
-                throw new \Exception(implode(' | ', $errors));
+                // BadRequestHttpException = HTTP 400. Dado inválido enviado pelo cliente.
+                throw new BadRequestHttpException(implode(' | ', $errors));
             }
 
             $created = $this->service->create($body);
@@ -78,14 +92,21 @@ class UserApiController extends BaseRestController
             Yii::$app->response->statusCode = 201;
             return [
                 'success' => true,
-                'type'    => 'success',
-                'data'    => $created,
+                'type' => 'success',
+                'data' => $created,
             ];
-        } catch (\Throwable $e) {
-            Yii::$app->response->statusCode = 400;
+        } catch (HttpException $e) {
+            Yii::$app->response->statusCode = $e->statusCode;
             return [
                 'success' => false,
-                'type'    => 'exception',
+                'type' => 'exception',
+                'message' => $e->getMessage(),
+            ];
+        } catch (Throwable $e) {
+            Yii::$app->response->statusCode = 500;
+            return [
+                'success' => false,
+                'type' => 'exception',
                 'message' => $e->getMessage(),
             ];
         }
@@ -106,7 +127,8 @@ class UserApiController extends BaseRestController
                 foreach ($user->getFirstErrors() as $field => $msg) {
                     $errors[] = "{$field}: {$msg}";
                 }
-                throw new \Exception(implode(' | ', $errors));
+                // BadRequestHttpException = HTTP 400. Dado inválido enviado pelo cliente.
+                throw new BadRequestHttpException(implode(' | ', $errors));
             }
 
             $message = $this->service->update($id, $body);
@@ -114,14 +136,21 @@ class UserApiController extends BaseRestController
             Yii::$app->response->statusCode = 200;
             return [
                 'success' => true,
-                'type'    => 'success',
-                'data'    => $message,
+                'type' => 'success',
+                'data' => $message,
             ];
-        } catch (\Throwable $e) {
-            Yii::$app->response->statusCode = 400;
+        } catch (HttpException $e) {
+            Yii::$app->response->statusCode = $e->statusCode;
             return [
                 'success' => false,
-                'type'    => 'exception',
+                'type' => 'exception',
+                'message' => $e->getMessage(),
+            ];
+        } catch (Throwable $e) {
+            Yii::$app->response->statusCode = 500;
+            return [
+                'success' => false,
+                'type' => 'exception',
                 'message' => $e->getMessage(),
             ];
         }
@@ -133,22 +162,46 @@ class UserApiController extends BaseRestController
             $result = $this->service->toggleActive($id);
             return [
                 'success' => true,
-                'type'    => 'success',
-                'data'    => $result,
+                'type' => 'success',
+                'data' => $result,
             ];
-        } catch (Throwable $e) {
-            Yii::$app->response->statusCode = 400;
+        } catch (HttpException $e) {
+            Yii::$app->response->statusCode = $e->statusCode;
             return [
                 'success' => false,
-                'type'    => 'exception',
+                'type' => 'exception',
+                'message' => $e->getMessage(),
+            ];
+        } catch (Throwable $e) {
+            Yii::$app->response->statusCode = 500;
+            return [
+                'success' => false,
+                'type' => 'exception',
                 'message' => $e->getMessage(),
             ];
         }
     }
 
-    public function actionDelete(int $id)
+    public function actionDelete(int $id): ?array
     {
-        $this->service->delete($id);
-        Yii::$app->response->statusCode = 204;
+        try {
+            $this->service->delete($id);
+            Yii::$app->response->statusCode = 204;
+            return null;
+        } catch (HttpException $e) {
+            Yii::$app->response->statusCode = $e->statusCode;
+            return [
+                'success' => false,
+                'type' => 'exception',
+                'message' => $e->getMessage(),
+            ];
+        } catch (Throwable $e) {
+            Yii::$app->response->statusCode = 500;
+            return [
+                'success' => false,
+                'type' => 'exception',
+                'message' => $e->getMessage(),
+            ];
+        }
     }
 }

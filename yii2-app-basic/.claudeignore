@@ -1,0 +1,24 @@
+# Dependências Composer — maior fonte de ruído, nunca precisam ser lidas
+vendor/
+
+# Arquivos gerados em runtime
+runtime/cache/
+runtime/debug/
+runtime/logs/
+runtime/xdebug/
+runtime/*.sqlite
+runtime/*.sqlite-shm
+runtime/*.sqlite-wal
+
+# Assets publicados pelo Yii (hashes gerados, não editáveis)
+web/assets/
+
+# Output e cobertura do Codeception
+tests/_output/
+tests/coverage/
+tests/_data/*.sql
+
+# Arquivos de build/IDE locais
+.idea/
+*.cache
+*.log

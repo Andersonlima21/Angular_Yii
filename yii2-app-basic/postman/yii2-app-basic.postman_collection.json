@@ -2,15 +2,42 @@
 	"info": {
 		"_postman_id": "b1a1c001-0001-0001-0001-000000000001",
 		"name": "yii2-app-basic",
-		"description": "Coleção dos endpoints REST do projeto yii2-app-basic.\n\n**Base URL:** `{{baseUrl}}` (http://localhost:8080).\n\n**Envelope padrão:** `{ success, type, data | message }`.\n\n**Variáveis automáticas:** ao criar qualquer recurso, o script de teste captura o `id` retornado e salva em `userId`, `configId`, `profileId` ou `settingId`. As demais requests já usam essas variáveis nos paths.\n\n**Recursos:**\n- `user-api` — CRUD de usuários + toggle de status.\n- `user-config` — pares key/value por usuário.\n- `user-profile` — dados adicionais do usuário.\n- `user-profile-setting` — settings do profile.",
+		"description": "Coleção dos endpoints REST do projeto yii2-app-basic.\n\n**Base URL:** `{{baseUrl}}` (http://localhost:8080).\n\n**Envelope padrão:** `{ success, type, data | message }`.\n\n**Variáveis automáticas:** ao criar qualquer recurso, o script de teste captura o `id` retornado e salva em `userId`, `configId`, `profileId` ou `settingId`. As demais requests já usam essas variáveis nos paths.\n\n**Xdebug:** defina `{{xdebugTrigger}}` como `debug123` para ativar o debug em todas as requests (envia `Cookie: XDEBUG_SESSION=debug123`). Deixe vazio para desativar. Requer `xdebug.start_with_request=trigger` e `xdebug.trigger_value=debug123` no php.ini.\n\n**Recursos:**\n- `user-api` — CRUD de usuários + toggle de status.\n- `user-config` — pares key/value por usuário.\n- `user-profile` — dados adicionais do usuário.\n- `user-profile-setting` — settings do profile.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
-		{ "key": "baseUrl",   "value": "http://localhost:8080", "type": "string" },
-		{ "key": "userId",    "value": "", "type": "string" },
-		{ "key": "configId",  "value": "", "type": "string" },
-		{ "key": "profileId", "value": "", "type": "string" },
-		{ "key": "settingId", "value": "", "type": "string" }
+		{ "key": "baseUrl",        "value": "http://localhost:8080", "type": "string" },
+		{ "key": "userId",         "value": "", "type": "string" },
+		{ "key": "configId",       "value": "", "type": "string" },
+		{ "key": "profileId",      "value": "", "type": "string" },
+		{ "key": "settingId",      "value": "", "type": "string" },
+		{
+			"key": "xdebugTrigger",
+			"value": "",
+			"type": "string",
+			"description": "Deixe vazio para desativar o Xdebug. Defina como 'debug123' para ativar (trigger_value do php.ini). O pre-request script injeta 'Cookie: XDEBUG_SESSION=<valor>' automaticamente."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Xdebug 3 — start_with_request=trigger",
+					"// Quando xdebugTrigger estiver preenchido, injeta o cookie que ativa o debug.",
+					"// Configure xdebugTrigger como 'debug123' (ou o valor de xdebug.trigger_value no php.ini).",
+					"const trigger = pm.collectionVariables.get('xdebugTrigger');",
+					"if (trigger) {",
+					"    pm.request.headers.upsert({",
+					"        key: 'Cookie',",
+					"        value: 'XDEBUG_SESSION=' + trigger",
+					"    });",
+					"    console.log('[Xdebug] Cookie XDEBUG_SESSION=' + trigger + ' adicionado.');",
+					"}"
+				]
+			}
+		}
 	],
 	"item": [
 		{
