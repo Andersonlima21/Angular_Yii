@@ -24,6 +24,10 @@ class UserService
         $this->filterHelper = $filterHelper;
     }
 
+    /**
+     * @throws HttpException
+     * @throws ServerErrorHttpException
+     */
     public function findAll(array $filtros = []): array
     {
         try {
@@ -32,8 +36,6 @@ class UserService
                 ->orderBy(['id' => SORT_ASC])
                 ->all();
 
-            // Lista vazia é um estado válido — não é erro.
-            // Lançar exception aqui faria o GET /user-api retornar 500 com tabela vazia.
             if (empty($data)) return [];
 
             $retorno = [];
@@ -63,6 +65,8 @@ class UserService
     }
 
     /**
+     * @throws NotFoundHttpException
+     * @throws HttpException
      * @throws ServerErrorHttpException
      */
     public function findById(int $id): array
@@ -76,11 +80,11 @@ class UserService
 
             // NotFoundHttpException = HTTP 404. Semântica correta: o recurso não existe. (Conceito de exceptions)
             if (empty($user)) throw new NotFoundHttpException("Usuário #{$id} não encontrado.");
-
             // Antes estava capturando as configs em uma query aqui. (Conceito de refatoração)
             $configs = $this->configService->findAll($id);
 
-            // capturar os settings de profiles também, dentro do profiles.
+            // capturar os settings de profiles também,
+            // dentro do profiles.
             $profiles = $this->profileService->findAll($id);
 
             return [
