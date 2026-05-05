@@ -66,11 +66,11 @@ class UserProfileService
             }
 
             return [
-                'id'         => (int)$profile['id'],
-                'user_id'    => (int)$profile['user_id'],
-                'phone'      => $profile['phone'],
+                'id' => (int)$profile['id'],
+                'user_id' => (int)$profile['user_id'],
+                'phone' => $profile['phone'],
                 'birth_date' => $profile['birth_date'],
-                'bio'        => $profile['bio'],
+                'bio' => $profile['bio'],
                 'avatar_url' => $profile['avatar_url'],
                 'created_at' => $profile['created_at'],
                 'updated_at' => $profile['updated_at'],
@@ -83,7 +83,7 @@ class UserProfileService
     /**
      * @throws ServerErrorHttpException
      */
-    public function create(array $body)
+    public function create(array $body): array
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -115,7 +115,7 @@ class UserProfileService
     }
 
     /**
-     * Atualização parcial: campos não enviados no body preservam o valor atual.
+     * Atualização parcial: só os campos enviados no body são atualizados.
      * user_id NÃO é atualizável (relação 1:1 com users + unique).
      *
      * @throws ServerErrorHttpException
@@ -124,22 +124,20 @@ class UserProfileService
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $existing = (new Query())
+            $exists = (new Query())
                 ->from(UserProfile::tableName())
                 ->where(['id' => $id])
-                ->one();
+                ->exists();
 
-            if (empty($existing)) {
+            if (!$exists) {
                 throw new \Exception('Nenhum perfil encontrado para o id ' . $id);
             }
 
-            $update = [
-                'phone'      => array_key_exists('phone', $body)      ? $body['phone']      : $existing['phone'],
-                'birth_date' => array_key_exists('birth_date', $body) ? $body['birth_date'] : $existing['birth_date'],
-                'bio'        => array_key_exists('bio', $body)        ? $body['bio']        : $existing['bio'],
-                'avatar_url' => array_key_exists('avatar_url', $body) ? $body['avatar_url'] : $existing['avatar_url'],
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
+            $update = ['updated_at' => date('Y-m-d H:i:s')];
+            if (array_key_exists('phone', $body)) $update['phone'] = $body['phone'];
+            if (array_key_exists('birth_date', $body)) $update['birth_date'] = $body['birth_date'];
+            if (array_key_exists('bio', $body)) $update['bio'] = $body['bio'];
+            if (array_key_exists('avatar_url', $body)) $update['avatar_url'] = $body['avatar_url'];
 
             $rows = Yii::$app->db->createCommand()
                 ->update(UserProfile::tableName(), $update, ['id' => $id])

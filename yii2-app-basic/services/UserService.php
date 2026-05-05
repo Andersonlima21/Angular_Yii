@@ -56,9 +56,11 @@ class UserService
 
             return $retorno;
 
-        } catch (HttpException $e) {
-            throw $e;
-        } catch (Throwable $e) {
+        }
+//        catch (HttpException $e) {
+//            throw $e;
+//        }
+        catch (Throwable $e) {
             // Só chega aqui se o banco falhar de verdade (conexão, SQL inválido, etc.)
             throw new ServerErrorHttpException('Falha na listagem de users. ' . $e->getMessage());
         }
@@ -100,7 +102,7 @@ class UserService
 
         } catch (HttpException $e) {
             // Re-lança HttpException sem encapsular — o status HTTP original (404, etc.) é preservado.
-            // Se não fizéssemos isso, o catch (Throwable) abaixo converteria tudo em 500.
+            // o catch (Throwable) abaixo converteria tudo em 500.
             throw $e;
         } catch (Throwable $e) {
             throw new ServerErrorHttpException('Falha na busca do usuário. ' . $e->getMessage());
@@ -181,11 +183,9 @@ class UserService
 
             if (!$exists) throw new NotFoundHttpException("Usuário #{$id} não encontrado.");
 
-            $update = [
-                'name' => $body['name'],
-                'email' => $body['email'],
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
+            $update = ['updated_at' => date('Y-m-d H:i:s')];
+            if (array_key_exists('name', $body)) $update['name'] = $body['name'];
+            if (array_key_exists('email', $body)) $update['email'] = $body['email'];
 
             $rows = Yii::$app->db->createCommand()
                 ->update('users', $update, ['id' => $id])
