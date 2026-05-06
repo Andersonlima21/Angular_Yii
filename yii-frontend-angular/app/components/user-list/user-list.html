@@ -34,7 +34,7 @@
             <div class="col-md-4">
                 <label class="form-label small"
                        bs-tooltip="array_filter — filtra registros por status no backend">
-                    Status
+                    Status (array_filter)
                 </label>
                 <select class="form-select form-select-sm"
                         ng-model="$ctrl.filter.status"
@@ -66,7 +66,7 @@
             <div class="col-md-4">
                 <label class="form-label small"
                        bs-tooltip="array_chunk — agrupa os registros em lotes de N itens">
-                    Agrupar em lotes de
+                    Agrupar em lotes de (array_chunk)
                 </label>
                 <div class="input-group input-group-sm">
                     <input type="number" class="form-control" min="1" max="10" placeholder="N usuários"
@@ -89,7 +89,7 @@
             <div class="col-md-4">
                 <label class="form-label small"
                        bs-tooltip="busca — pesquisa por nome ou email no backend (server-side)">
-                    Busca server-side
+                    Busca server-side (array_filter + stripos)
                 </label>
                 <div class="input-group input-group-sm">
                     <input type="text" class="form-control" placeholder="nome ou e-mail"
@@ -107,7 +107,7 @@
             <div class="col-md-5">
                 <label class="form-label small"
                        bs-tooltip="ordenar_por + direcao — ordenação dinâmica por campo e sentido">
-                    Ordenar por
+                    Ordenar por (usort + <=>)
                 </label>
                 <div class="input-group input-group-sm">
                     <select class="form-select form-select-sm"
@@ -134,7 +134,7 @@
             <div class="col-md-3">
                 <label class="form-label small"
                        bs-tooltip="limite — teto de resultados retornados pelo backend">
-                    Limite de resultados
+                    Limite de resultados (array_splice)
                 </label>
                 <div class="input-group input-group-sm">
                     <input type="number" class="form-control" min="1" placeholder="ex: 5"
@@ -167,7 +167,7 @@
                            ng-disabled="$ctrl.filter.resumo || $ctrl.filter.coluna">
                     <label class="form-check-label small" for="chkInverter"
                            bs-tooltip="array_reverse — inverte a ordem dos resultados">
-                        Inverter ordem
+                        Inverter ordem (array_reverse)
                     </label>
                 </div>
             </div>
@@ -181,7 +181,7 @@
                            ng-disabled="$ctrl.filter.resumo || $ctrl.filter.coluna">
                     <label class="form-check-label small" for="chkSemDominio"
                            bs-tooltip="array_map — transforma o e-mail ocultando o domínio">
-                        Ocultar domínio do e-mail
+                        Ocultar domínio do e-mail (array_map)
                     </label>
                 </div>
             </div>
@@ -195,7 +195,7 @@
                            ng-disabled="$ctrl.filter.resumo || $ctrl.filter.chunk || $ctrl.filter.coluna">
                     <label class="form-check-label small" for="chkPagina"
                            bs-tooltip="array_slice — divide os resultados em páginas">
-                        Paginar
+                        Paginar (array_slice)
                     </label>
                 </div>
                 <div class="input-group input-group-sm" ng-if="$ctrl.filter.pagina">
@@ -215,7 +215,7 @@
                            ng-disabled="$ctrl.filter.coluna">
                     <label class="form-check-label small" for="chkResumo"
                            bs-tooltip="array_reduce — agrupa e conta ativos/inativos">
-                        Mostrar resumo ativos/inativos
+                        Mostrar resumo ativos/inativos (array_reduce)
                     </label>
                 </div>
             </div>
@@ -229,7 +229,7 @@
             <div class="col-md-3 col-6">
                 <label class="form-label small"
                        bs-tooltip="coluna — retorna array plano de valores de um único campo">
-                    Extrair coluna
+                    Extrair coluna (array_column)
                 </label>
                 <select class="form-select form-select-sm"
                         ng-model="$ctrl.filter.coluna"
@@ -248,7 +248,7 @@
             <div class="col-md-9 col-12">
                 <label class="form-label small"
                        bs-tooltip="campos[] — projeção: retorna só as chaves selecionadas por objeto">
-                    Projeção de campos
+                    Projeção de campos (array_intersect_key)
                 </label>
                 <div class="d-flex flex-wrap gap-3">
                     <div class="form-check form-check-inline" ng-repeat="c in ['id','name','email','is_active','created_at','updated_at']">

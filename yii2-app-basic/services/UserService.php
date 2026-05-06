@@ -82,7 +82,7 @@ class UserService
 
             // NotFoundHttpException = HTTP 404. Semântica correta: o recurso não existe. (Conceito de exceptions)
             if (empty($user)) throw new NotFoundHttpException("Usuário #{$id} não encontrado.");
-            // Antes estava capturando as configs em uma query aqui. (Conceito de refatoração)
+            // Antes capturava as configs em uma query aqui. (Conceito de refatorarão)
             $configs = $this->configService->findAll($id);
 
             // capturar os settings de profiles também,
