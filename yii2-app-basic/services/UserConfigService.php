@@ -5,6 +5,7 @@ namespace app\services;
 use app\models\UserConfig;
 use Throwable;
 use Yii;
+use yii\db\Exception;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\web\ServerErrorHttpException;
@@ -15,7 +16,7 @@ class UserConfigService
     // Conceito de refactor -- Anteriormente eu tinha criado todos os cruds com cada metodo,
     // mas vi que eu preciso usar o getId de configs dentro do user,
     // então decidi trasformar esse metodo para que ele consiga ser usado em outros lugares que tenham um user e precisem das configs,
-    // criando um parametro nao obrigatorio, mas que que quando venha eu faço um filterWhere que caso userId null o filtro é ignorado.
+    // criando um parametro não obrigatorio, mas que quando venha eu faço um filterWhere que caso userId null o filtro é ignorado.
     /**
      * @throws ServerErrorHttpException
      */
@@ -31,7 +32,7 @@ class UserConfigService
             // (Conceito de Exception)
             // tratamento de return, caso não venha o userId, eu retorno a exception para que quando
             // o metodo seja chamado de forma individual, ele tenha um retorno amigavel.
-            // caso contrario, retorna um array vazio para o metodo que o chama.
+            // Caso contrario, retorna um array vazio para o metodo que o chama.
             if (empty($data)) {
                 if ($userId !== null) {
                     return [];
@@ -74,7 +75,7 @@ class UserConfigService
                 ->one();
 
             if (empty($config)) {
-                throw new \Exception('Nenhuma configuração encontrada para o id ' . $id);
+                throw new Exception('Nenhuma configuração encontrada para o id ' . $id);
             }
 
             return [
@@ -93,7 +94,7 @@ class UserConfigService
     /**
      * @throws ServerErrorHttpException
      */
-    public function create(array $body): string
+    public function create(array $body): array
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -129,9 +130,10 @@ class UserConfigService
                 ->insert(UserConfig::tableName(), $insert)
                 ->execute();
 
+            $id = (int)Yii::$app->db->getLastInsertID();
             $transaction->commit();
 
-            return 'Config para o user id ' . $body['user_id'] . ' criado com sucesso';
+            return ['id' => $id, 'message' => 'Config para o user id ' . $body['user_id'] . ' criado com sucesso'];
 
         } catch (Throwable $e) {
             $transaction->rollBack();

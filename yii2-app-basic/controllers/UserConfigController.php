@@ -6,13 +6,8 @@ use app\models\UserConfig;
 use app\services\UserConfigService;
 use Throwable;
 use Yii;
-use yii\filters\Cors;
-use yii\filters\VerbFilter;
-use yii\rest\Controller;
-use yii\rest\OptionsAction;
-use yii\web\Response;
 
-class UserConfigController extends Controller
+class UserConfigController extends BaseRestController
 {
     private UserConfigService $service;
 
@@ -22,63 +17,21 @@ class UserConfigController extends Controller
         parent::__construct($id, $module, $config);
     }
 
-    public function behaviors()
-    {
-        $behaviors = parent::behaviors();
-        $behaviors = array_merge([
-            'corsFilter' => [
-                'class' => Cors::class,
-                'cors' => [
-                    'Origin' => ['*'],
-                    'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-                    'Access-Control-Request-Headers' => ['*'],
-                    'Access-Control-Allow-Credentials' => null,
-                    'Access-Control-Max-Age' => 3600,
-                ],
-            ],
-        ], $behaviors);
-        $behaviors['contentNegotiator']['formats'] = [
-            'application/json' => Response::FORMAT_JSON,
-        ];
-        $behaviors['verbs'] = [
-            'class' => VerbFilter::class,
-            'actions' => [
-                'index' => ['GET'],
-                'view' => ['GET'],
-                'create' => ['POST'],
-                'update' => ['PUT', 'PATCH'],
-                'delete' => ['DELETE'],
-                'options' => ['OPTIONS'],
-            ],
-        ];
-        return $behaviors;
-    }
-
-    public function actions()
-    {
-        return [
-            'options' => [
-                'class' => OptionsAction::class,
-                'collectionOptions' => ['GET', 'POST', 'OPTIONS'],
-                'resourceOptions' => ['GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            ],
-        ];
-    }
-
     public function actionIndex(): array
     {
         try {
             return [
                 'success' => true,
-                'type' => 'success',
-                'data' => $this->service->findAll()
+                'type'    => 'success',
+                'data'    => $this->service->findAll(),
             ];
         } catch (Throwable $e) {
             Yii::$app->response->statusCode = 400;
             return [
                 'success' => false,
-                'type' => 'exception',
-                'message' => $e->getMessage()];
+                'type'    => 'exception',
+                'message' => $e->getMessage(),
+            ];
         }
     }
 
@@ -121,14 +74,14 @@ class UserConfigController extends Controller
             Yii::$app->response->statusCode = 201;
             return [
                 'success' => true,
-                'type' => 'success',
-                'data' => $created,
+                'type'    => 'success',
+                'data'    => $created,
             ];
         } catch (\Throwable $e) {
             Yii::$app->response->statusCode = 400;
             return [
                 'success' => false,
-                'type' => 'exception',
+                'type'    => 'exception',
                 'message' => $e->getMessage(),
             ];
         }

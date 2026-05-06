@@ -5,9 +5,10 @@ namespace app\services;
 use app\models\UserApi;
 use Throwable;
 use Yii;
-use yii\db\Exception;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\web\HttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\ServerErrorHttpException;
 
 class UserService
@@ -23,6 +24,10 @@ class UserService
         $this->filterHelper = $filterHelper;
     }
 
+    /**
+     * @throws HttpException
+     * @throws ServerErrorHttpException
+     */
     public function findAll(array $filtros = []): array
     {
         try {
@@ -31,7 +36,7 @@ class UserService
                 ->orderBy(['id' => SORT_ASC])
                 ->all();
 
-            if (empty($data)) throw new Exception('Não foram encontrados registros na tabela de users');
+            if (empty($data)) return [];
 
             $retorno = [];
             foreach ($data as $item) {
@@ -51,12 +56,19 @@ class UserService
 
             return $retorno;
 
-        } catch (Throwable $e) {
+        }
+//        catch (HttpException $e) {
+//            throw $e;
+//        }
+        catch (Throwable $e) {
+            // Só chega aqui se o banco falhar de verdade (conexão, SQL inválido, etc.)
             throw new ServerErrorHttpException('Falha na listagem de users. ' . $e->getMessage());
         }
     }
 
     /**
+     * @throws NotFoundHttpException
+     * @throws HttpException
      * @throws ServerErrorHttpException
      */
     public function findById(int $id): array
@@ -68,12 +80,13 @@ class UserService
                 ->where(['id' => $id])
                 ->one();
 
-            if (empty($user)) throw new Exception('Nenhum usuário encontrado para o id ' . $id);
-
-            // Antes estava capturando as configs em uma query aqui. (Conceito de refatoração)
+            // NotFoundHttpException = HTTP 404. Semântica correta: o recurso não existe. (Conceito de exceptions)
+            if (empty($user)) throw new NotFoundHttpException("Usuário #{$id} não encontrado.");
+            // Antes capturava as configs em uma query aqui. (Conceito de refatorarão)
             $configs = $this->configService->findAll($id);
 
-            // capturar os settings de profiles também, dentro do profiles.
+            // capturar os settings de profiles também,
+            // dentro do profiles.
             $profiles = $this->profileService->findAll($id);
 
             return [
@@ -87,6 +100,10 @@ class UserService
                 'profiles' => $profiles,
             ];
 
+        } catch (HttpException $e) {
+            // Re-lança HttpException sem encapsular — o status HTTP original (404, etc.) é preservado.
+            // o catch (Throwable) abaixo converteria tudo em 500.
+            throw $e;
         } catch (Throwable $e) {
             throw new ServerErrorHttpException('Falha na busca do usuário. ' . $e->getMessage());
         }
@@ -116,8 +133,9 @@ class UserService
 
     /**
      * @throws ServerErrorHttpException
+     * @throws HttpException
      */
-    public function create(array $body): string
+    public function create(array $body): array
     {
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -135,16 +153,25 @@ class UserService
                 ->insert('users', $insert)
                 ->execute();
 
+            $id = (int)Yii::$app->db->getLastInsertID();
             $transaction->commit();
 
-            return 'Usuário ' . $body['name'] . ' cadastrado com sucesso!';
+            return ['id' => $id, 'message' => 'Usuário ' . $body['name'] . ' cadastrado com sucesso!'];
 
+        } catch (HttpException $e) {
+            $transaction->rollBack();
+            throw $e;
         } catch (Throwable $e) {
             $transaction->rollBack();
             throw new ServerErrorHttpException('Falha na criação do user. ' . $e->getMessage());
         }
     }
 
+    /**
+     * @throws NotFoundHttpException
+     * @throws HttpException
+     * @throws ServerErrorHttpException
+     */
     public function update(int $id, array $body): string
     {
         $transaction = Yii::$app->db->beginTransaction();
@@ -154,13 +181,11 @@ class UserService
                 ->where(['id' => $id])
                 ->exists();
 
-            if (!$exists) throw new Exception('Nenhum usuário encontrado para o id ' . $id);
+            if (!$exists) throw new NotFoundHttpException("Usuário #{$id} não encontrado.");
 
-            $update = [
-                'name' => $body['name'],
-                'email' => $body['email'],
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
+            $update = ['updated_at' => date('Y-m-d H:i:s')];
+            if (array_key_exists('name', $body)) $update['name'] = $body['name'];
+            if (array_key_exists('email', $body)) $update['email'] = $body['email'];
 
             $rows = Yii::$app->db->createCommand()
                 ->update('users', $update, ['id' => $id])
@@ -170,12 +195,20 @@ class UserService
 
             return "Usuário #{$id} atualizado com sucesso! ({$rows} linha(s) afetada(s))";
 
-        } catch (\Throwable $e) {
+        } catch (HttpException $e) {
+            $transaction->rollBack();
+            throw $e;
+        } catch (Throwable $e) {
             $transaction->rollBack();
             throw new ServerErrorHttpException('Falha na atualização do user. ' . $e->getMessage());
         }
     }
 
+    /**
+     * @throws HttpException
+     * @throws NotFoundHttpException
+     * @throws ServerErrorHttpException
+     */
     public function toggleActive(int $id): array
     {
         $transaction = Yii::$app->db->beginTransaction();
@@ -186,7 +219,7 @@ class UserService
                 ->where(['id' => $id])
                 ->one();
 
-            if (empty($user)) throw new Exception('Nenhum usuário encontrado para o id ' . $id);
+            if (empty($user)) throw new NotFoundHttpException("Usuário #{$id} não encontrado.");
 
             $newStatus = !(bool)$user['is_active'];
 
@@ -205,12 +238,20 @@ class UserService
                 'message' => 'Usuário ' . ($newStatus ? 'ativado' : 'inativado') . ' com sucesso.',
             ];
 
+        } catch (HttpException $e) {
+            $transaction->rollBack();
+            throw $e;
         } catch (Throwable $e) {
             $transaction->rollBack();
             throw new ServerErrorHttpException('Falha ao alterar status do usuário. ' . $e->getMessage());
         }
     }
 
+    /**
+     * @throws HttpException
+     * @throws NotFoundHttpException
+     * @throws ServerErrorHttpException
+     */
     public function delete(int $id): void
     {
         $transaction = Yii::$app->db->beginTransaction();
@@ -220,13 +261,16 @@ class UserService
                 ->where(['id' => $id])
                 ->exists();
 
-            if (!$exists) throw new Exception('Nenhum usuário encontrado para o id ' . $id);
+            if (!$exists) throw new NotFoundHttpException("Usuário #{$id} não encontrado.");
 
             Yii::$app->db->createCommand()
                 ->delete(UserApi::tableName(), ['id' => $id])
                 ->execute();
 
             $transaction->commit();
+        } catch (HttpException $e) {
+            $transaction->rollBack();
+            throw $e;
         } catch (Throwable $e) {
             $transaction->rollBack();
             throw new ServerErrorHttpException('Falha na remoção do usuário. ' . $e->getMessage());

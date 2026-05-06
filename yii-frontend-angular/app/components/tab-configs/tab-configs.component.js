@@ -6,11 +6,11 @@ angular.module('yiiApp').component('tabConfigs', {
         var $ctrl = this;
 
         $ctrl.$onInit = function () {
-            $ctrl.configs    = userEditContext.user.configs || [];
-            $ctrl.editingId  = null;
-            $ctrl.saving     = false;
-            $ctrl.message    = null;
-            $ctrl.error      = null;
+            $ctrl.configs = userEditContext.user.configs || [];
+            $ctrl.editingId = null;
+            $ctrl.saving = false;
+            $ctrl.message = null;
+            $ctrl.error = null;
             resetForm();
         };
 
@@ -29,7 +29,7 @@ angular.module('yiiApp').component('tabConfigs', {
             $ctrl.editingId = config.id;
             $ctrl.form = { user_id: userEditContext.userId, key: config.key, value: config.value };
             $ctrl.message = null;
-            $ctrl.error   = null;
+            $ctrl.error = null;
         };
 
         $ctrl.cancelEdit = function () {
@@ -38,9 +38,9 @@ angular.module('yiiApp').component('tabConfigs', {
         };
 
         $ctrl.submit = function () {
-            $ctrl.saving  = true;
+            $ctrl.saving = true;
             $ctrl.message = null;
-            $ctrl.error   = null;
+            $ctrl.error = null;
 
             var promise = $ctrl.editingId
                 ? userConfigService.update($ctrl.editingId, $ctrl.form)
@@ -59,9 +59,9 @@ angular.module('yiiApp').component('tabConfigs', {
 
         $ctrl.remove = function (config) {
             if (!confirm('Remover a config "' + config.key + '"?')) return;
-            $ctrl.saving  = true;
+            $ctrl.saving = true;
             $ctrl.message = null;
-            $ctrl.error   = null;
+            $ctrl.error = null;
 
             userConfigService.remove(config.id).then(function () {
                 $ctrl.message = 'Config "' + config.key + '" removida.';

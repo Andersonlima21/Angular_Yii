@@ -28,7 +28,31 @@
       "Bash(php -d display_errors=1 index.php)",
       "Bash(cat /tmp/yii_8095.log)",
       "Bash(curl -s -i \"http://localhost:8095/user-api\" -H \"Accept: application/json\")",
-      "Bash(python -m json.tool)"
+      "Bash(python -m json.tool)",
+      "Bash(mkdir -p \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/web\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/config\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/exceptions\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/models\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/migrations\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/filters\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/services\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/controllers\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/runtime\")",
+      "Bash(mkdir -p \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/services\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/controllers\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/views\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/filters\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/interceptors\" \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/styles\")",
+      "Bash(composer install *)",
+      "Bash(composer show *)",
+      "Bash(composer search *)",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/app.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/services/taskService.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/controllers/taskController.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/controllers/dashboardController.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/interceptors/authInterceptor.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/services/authService.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/services/categoryService.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/controllers/loginController.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/controllers/registerController.js\")",
+      "Bash(node --check \"C:/Users/Listenx/Documents/estudo/Novo Estudo/frontend/app/controllers/categoryController.js\")",
+      "Bash(grep -v \"^--$\")",
+      "Bash(php -l \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/controllers/BaseController.php\")",
+      "Bash(php -l \"C:/Users/Listenx/Documents/estudo/Novo Estudo/api/controllers/v1/TaskController.php\")",
+      "Bash(grep -v \"\\\\.db$\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Listenx\\\\Documents\\\\estudo\\\\Angular_Yii\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Listenx\\\\Documents\\\\estudo\\\\Angular_Yii\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")"
     ]
   }
 }

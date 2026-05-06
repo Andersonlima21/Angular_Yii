@@ -28,9 +28,11 @@ class UserApi extends ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'email'], 'required'],
+            // 'required' só se aplica no SCENARIO_DEFAULT (criação). No 'update', campos são opcionais.
+            [['name', 'email'], 'required', 'on' => self::SCENARIO_DEFAULT],
             [['name', 'email'], 'string', 'max' => 255],
             ['email', 'email'],
+            // unique exclui o próprio registro automaticamente quando isNewRecord = false (findOne).
             ['email', 'unique'],
             ['is_active', 'boolean'],
             ['is_active', 'default', 'value' => true],
